@@ -1,0 +1,85 @@
+{
+  "name": "miscore-shop-frontend",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --port 5200",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "serve:ssr:miscore-shop-frontend": "node ../../wwwroot/site/server/server.mjs",
+    "generate-api-dev": "docker run --rm -v \"%cd%:/local\" openapitools/openapi-generator-cli generate  -i http://host.docker.internal:58021/swagger/v1/swagger.yaml -g typescript-angular -o /local/src/public-api --additional-properties=basePath=",
+    "prepare": "husky",
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix",
+    "format": "prettier --write \"src/**/*.{ts,html,css,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,css,json,md}\""
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.component.html": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.css": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.json": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.md": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^19.0.0",
+    "@angular/cdk": "^19.0.0",
+    "@angular/common": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/forms": "^19.0.0",
+    "@angular/material": "^19.0.0",
+    "@angular/platform-browser": "^19.0.0",
+    "@angular/platform-browser-dynamic": "^19.0.0",
+    "@angular/platform-server": "^19.0.0",
+    "@angular/router": "^19.0.0",
+    "@angular/ssr": "^19.2.19",
+    "express": "^4.18.2",
+    "ngx-quill": "^27.1.2",
+    "primeicons": "^7.0.0",
+    "primeng": "^19.0.0",
+    "quill": "^2.0.3",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^19.0.0",
+    "@angular/build": "^19.2.19",
+    "@angular/cli": "^19.0.0",
+    "@angular/compiler": "^19.2.17",
+    "@angular/compiler-cli": "^19.0.0",
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.18.0",
+    "angular-eslint": "19.0.0",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.0",
+    "ngx-pagination": "^6.0.3",
+    "postcss": "^8.4.31",
+    "prettier": "^3.8.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "~5.6.2",
+    "typescript-eslint": "8.50.1"
+  }
+}
