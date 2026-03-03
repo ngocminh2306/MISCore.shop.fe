@@ -4,7 +4,6 @@ import { CartService } from '../../services/cart.service';
 import { ProductService as PublicProductService } from '../../../public-api/api/product.service';
 import { CategoryService } from '../../../public-api/api/category.service';
 import { BannerSliderComponent } from '../../components/banner-slider/banner-slider.component';
-import { Banner } from '../../components/banner-slider/banner-slider.component';
 import { ProductCardComponent } from '../../components/product-card/product-card.component';
 import { CategoryGridComponent } from '../../components/category-grid/category-grid.component';
 import { ArticlesSectionComponent } from '../../components/articles-section/articles-section.component';
@@ -73,10 +72,10 @@ interface Category {
     </section>
 
     <!-- Categories Section -->
-    <misc-category-grid
+    <app-category-grid
       [categories]="categories"
       (categorySelected)="onCategorySelected($event)">
-    </misc-category-grid>
+    </app-category-grid>
 
     <!-- Articles Section -->
     <misc-articles-section></misc-articles-section>

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CurrencyPipe, CommonModule } from '@angular/common';
 import { OrderDto, OrderService } from '../../../../public-api';
 import { AuthService } from '../../../services/auth.service';
@@ -11,7 +11,7 @@ import { LanguageService } from '../../../services/language.service';
 @Component({
   selector: 'app-admin-orders',
   standalone: true,
-  imports: [RouterLink, CommonModule, FormsModule, CurrencyPipe, TranslatePipe],
+  imports: [CommonModule, FormsModule, CurrencyPipe, TranslatePipe],
   template: `
     <div class="container mx-auto px-4 py-8">
       <div class="flex justify-between items-center mb-6">
@@ -333,7 +333,7 @@ export class AdminOrdersComponent implements OnInit {
   currentPage = 1;
   pageSize = 10;
   totalPages = 0;
-  
+
   // Filter parameters
   searchTerm: string = '';
   selectedStatus: string = '';
@@ -343,14 +343,14 @@ export class AdminOrdersComponent implements OnInit {
   // Sort parameters
   sortBy: string = 'orderDate';
   sortOrder: string = 'desc'; // 'asc' or 'desc'
-  
+
   // Menu states
   activeOrderMenu: number | null = null;
 
   // Order detail view
   showOrderDetail = false;
   selectedOrder: OrderDto | null = null;
-  
+
   // Available statuses
   availableStatuses = [
     { label: 'Pending', value: 'Pending' },
@@ -378,7 +378,7 @@ export class AdminOrdersComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private messageDialogService: MessageDialogService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadOrders(1);

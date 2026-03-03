@@ -1,5 +1,4 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AccountManagementService as PublicAccountService } from '../../../../public-api/api/accountManagement.service';
 import { MessageDialogService } from '../../../services/message-dialog.service';
@@ -21,7 +20,7 @@ interface UserWithRoles {
 @Component({
   selector: 'app-admin-roles',
   standalone: true,
-  imports: [RouterLink, FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -210,7 +209,7 @@ export class AdminRolesComponent implements OnInit {
   users = signal<UserWithRoles[]>([]);
   searchTerm = '';
   roleFilter = '';
-  
+
   currentPage = signal(1);
   pageSize = signal(10);
   private languageService = inject(LanguageService);
@@ -220,7 +219,7 @@ export class AdminRolesComponent implements OnInit {
   constructor(
     private publicAccountService: PublicAccountService,
     private messageDialogService: MessageDialogService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -253,7 +252,7 @@ export class AdminRolesComponent implements OnInit {
           lastLoginAt: apiUser.lastLoginAt ? new Date(apiUser.lastLoginAt) : undefined,
           createdAt: apiUser.createdAt ? new Date(apiUser.createdAt) : new Date()
         }));
-        
+
         this.users.set(users);
         this.totalCount.set(response.totalCount || userData.length);
         this.totalPages.set(Math.ceil((response.totalCount || userData.length) / this.pageSize()));

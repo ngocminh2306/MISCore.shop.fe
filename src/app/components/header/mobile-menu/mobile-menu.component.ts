@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NgIf, NgFor } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { CartService } from '../../../services/cart.service';
 import { CategoryService } from '../../../../public-api/api/category.service';
@@ -16,9 +16,9 @@ interface Category {
 }
 
 @Component({
-  selector: 'misc-mobile-menu',
+  selector: 'app-mobile-menu',
   standalone: true,
-  imports: [RouterLink, NgIf, NgFor],
+  imports: [RouterLink, NgIf],
   template: `
     <div
       *ngIf="isOpen"
@@ -252,14 +252,14 @@ export class MobileMenuComponent implements OnInit {
   user = this.authService.currentUser$;
   isLoggedIn = this.authService.isLoggedIn$;
   isLoading = this.authService.isLoading$;
-  
+
   // Properties for nested category menu
   categories: Category[] = [];
   showCategoryMenu = false;
   selectedCategory: Category | null = null;
 
   ngOnInit(): void {
-    if(this.isOpen) {
+    if (this.isOpen) {
       this.loadCategories();
     }
   }

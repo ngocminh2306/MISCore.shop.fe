@@ -133,7 +133,7 @@ import { ProductDto } from '../../../public-api';
                   <button
                     (click)="increaseQuantity()"
                     class="px-4 py-2 text-gray-600 hover:bg-gray-100 font-bold"
-                    [disabled]="quantity >= (product?.stockQuantity || 0)"
+                    [disabled]="quantity >= (product.stockQuantity || 0)"
                   >
                     +
                   </button>
@@ -247,26 +247,26 @@ export class ProductDetailComponent implements OnInit {
       }
     });
   }
-  
-  
+
+
   setImage(imageUrl: string | undefined): void {
     if (this.product && imageUrl) {
       this.product.mainImageUrl = imageUrl;
     }
   }
-  
+
   increaseQuantity(): void {
     if (this.product && this.quantity < (this.product?.stockQuantity || 0)) {
       this.quantity++;
     }
   }
-  
+
   decreaseQuantity(): void {
     if (this.quantity > 1) {
       this.quantity--;
     }
   }
-  
+
   addToCart(): void {
     if (this.product) {
       if (!this.product.isInStock) {

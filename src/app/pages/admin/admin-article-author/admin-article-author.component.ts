@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Title, Meta } from '@angular/platform-browser';
@@ -9,7 +8,7 @@ import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confi
 @Component({
   selector: 'app-admin-article-author',
   standalone: true,
-  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -164,7 +163,7 @@ import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confi
                     >
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500">Website</label>
+                    <label for="websiteUrl" class="block text-xs text-gray-500">Website</label>
                     <input
                       type="text"
                       [(ngModel)]="authorFormModel.websiteUrl"
@@ -177,8 +176,9 @@ import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confi
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
+                  id="status"
                   [(ngModel)]="authorFormModel.status"
                   name="status"
                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"

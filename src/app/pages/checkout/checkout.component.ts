@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MessageDialogService } from '../../services/message-dialog.service';
-import { CurrencyPipe, DecimalPipe, NgIf } from '@angular/common';
+import { CurrencyPipe, NgIf } from '@angular/common';
 import { AccountService, AddressService, OrderService, VnPayService } from '../../../public-api';
 import { CartService } from '../../services/cart.service';
 import { isPlatformBrowser } from '@angular/common';
@@ -40,7 +40,7 @@ interface CartSummary {
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [ReactiveFormsModule, DecimalPipe, NgIf, CurrencyPipe],
+  imports: [ReactiveFormsModule, NgIf, CurrencyPipe],
   template: `
     <div class="container mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold text-gray-800 mb-8">Checkout</h1>
@@ -1027,9 +1027,9 @@ export class CheckoutComponent implements OnInit {
         this.cartService.clearCart();
         // Redirect to VNPay payment page
         if (response.paymentUrl) {
-        if (isPlatformBrowser(this.platformId)) {
-          window.location.href = response.paymentUrl;
-        }
+          if (isPlatformBrowser(this.platformId)) {
+            window.location.href = response.paymentUrl;
+          }
         } else {
           this.messageDialogService.error('Failed to initialize payment. Please try again.', 'Payment Error');
           this.isProcessing = false;

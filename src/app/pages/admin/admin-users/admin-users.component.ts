@@ -1,5 +1,4 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { User } from '../../../models/user';
@@ -12,7 +11,7 @@ import { UpdateUserDto } from '../../../../public-api/model/updateUserDto';
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [RouterLink, FormsModule, DatePipe, TranslatePipe],
+  imports: [FormsModule, DatePipe, TranslatePipe],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -456,7 +455,7 @@ export class AdminUsersComponent implements OnInit {
     roles: [] as string[]
   });
 
-  constructor(private accountManagementService: AccountManagementService) {}
+  constructor(private accountManagementService: AccountManagementService) { }
 
   ngOnInit(): void {
     this.loadUsers();

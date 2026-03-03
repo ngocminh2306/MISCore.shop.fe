@@ -1,5 +1,4 @@
 import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 export interface Category {
   id: number;
@@ -9,9 +8,9 @@ export interface Category {
 }
 
 @Component({
-  selector: 'misc-category-grid',
+  selector: 'app-category-grid',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   template: `
     <section class="py-8 bg-white">
       <div class="container mx-auto px-4">

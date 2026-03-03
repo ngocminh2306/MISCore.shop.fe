@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-privacy-policy',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   template: `
     <div class="max-w-4xl mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold text-gray-800 mb-6">Privacy Policy</h1>
@@ -132,9 +131,9 @@ import { RouterLink } from '@angular/router';
   `]
 })
 export class PrivacyPolicyComponent {
-  currentDate = new Date().toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  currentDate = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
 }

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../services/cart.service';
 import { ProductService as PublicProductService } from '../../../public-api/api/product.service';
@@ -10,7 +10,7 @@ import { CurrencyPipe } from '@angular/common';
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [RouterLink, FormsModule, ProductCardComponent, CurrencyPipe],
+  imports: [FormsModule, ProductCardComponent, CurrencyPipe],
   template: `
     <div class="container mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold text-gray-800 mb-8">Sản phẩm</h1>

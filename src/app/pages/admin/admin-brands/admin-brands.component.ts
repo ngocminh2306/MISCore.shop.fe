@@ -1,5 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { BrandService } from '../../../../public-api/api/brand.service';
@@ -8,8 +7,6 @@ import { BrandDto } from '../../../../public-api/model/brandDto';
 import { CommonTableComponent, TableColumn } from '../../../components/common-table/common-table.component';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
-import { LanguageService } from '../../../services/language.service';
-import { MessageDialogService } from '../../../services/message-dialog.service';
 import { lastValueFrom } from 'rxjs';
 
 interface Brand {
@@ -26,7 +23,7 @@ interface Brand {
 @Component({
   selector: 'app-admin-brands',
   standalone: true,
-  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent, TranslatePipe],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent, TranslatePipe],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -330,7 +327,7 @@ export class AdminBrandsComponent implements OnInit {
   constructor(
     private brandService: BrandService,
     private fileService: FileService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadBrands();
@@ -653,7 +650,7 @@ export class AdminBrandsComponent implements OnInit {
 
   // Common Table event handlers
   handleAction(actionName: string, item: any): void {
-    switch(actionName) {
+    switch (actionName) {
       case 'edit':
         this.openEditModal(item);
         break;

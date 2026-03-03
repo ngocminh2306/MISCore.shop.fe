@@ -2,16 +2,15 @@ import { Component, inject, OnInit, ElementRef, Renderer2, effect } from '@angul
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
-import { User } from '../../models/user';
-import { DOCUMENT, NgIf } from '@angular/common';
+import { DOCUMENT } from '@angular/common';
 import { MobileMenuComponent } from './mobile-menu/mobile-menu.component';
 import { UserDropdownComponent } from './user-dropdown/user-dropdown.component';
 import { CategoriesDropdownComponent } from './categories-dropdown/categories-dropdown.component';
 
 @Component({
-  selector: 'misc-header',
+  selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, NgIf, MobileMenuComponent, UserDropdownComponent, CategoriesDropdownComponent],
+  imports: [RouterLink, MobileMenuComponent, UserDropdownComponent, CategoriesDropdownComponent],
   template: `
     <header class="bg-white shadow-sm sticky top-0 z-50 transition-opacity duration-300 animate-fadeIn">
       <div class="container mx-auto px-4 py-3">
@@ -24,7 +23,7 @@ import { CategoriesDropdownComponent } from './categories-dropdown/categories-dr
             <a routerLink="/" class="text-gray-800 hover:text-orange-500 font-medium transition-colors">Home</a>
 
             <!-- Categories Dropdown -->
-            <misc-categories-dropdown />
+            <app-categories-dropdown />
 
             <a routerLink="/about" class="text-gray-800 hover:text-orange-500 font-medium transition-colors">About</a>
             <a routerLink="/contact" class="text-gray-800 hover:text-orange-500 font-medium transition-colors">Contact</a>
@@ -68,7 +67,7 @@ import { CategoriesDropdownComponent } from './categories-dropdown/categories-dr
                 </div>
               } @else {
                 <!-- User dropdown -->
-                <misc-user-dropdown class="transition-opacity duration-300 animate-fadeIn" />
+                <app-user-dropdown class="transition-opacity duration-300 animate-fadeIn" />
               }
 
               <!-- Mobile menu button -->
@@ -86,7 +85,7 @@ import { CategoriesDropdownComponent } from './categories-dropdown/categories-dr
               </button>
 
               <!-- Mobile menu -->
-              <misc-mobile-menu
+              <app-mobile-menu
                 [isOpen]="showMobileMenu"
                 (menuClosed)="closeAllMenus()"
                 (navigated)="closeAllMenus()"
@@ -221,7 +220,7 @@ export class HeaderComponent implements OnInit {
     effect(() => {
       // Trigger animation when user logs in
       this.triggerReloadAnimation();
-      if( this.user() ) {
+      if (this.user()) {
         // Trigger animation when user info is loaded
         this.triggerReloadAnimation();
       }
@@ -235,8 +234,8 @@ export class HeaderComponent implements OnInit {
 
       // Close mobile menu if clicking outside (but not on the hamburger button)
       if (this.showMobileMenu &&
-          !target.closest('.mobile-menu') &&
-          !target.closest('.mobile-menu-toggle')) {
+        !target.closest('.mobile-menu') &&
+        !target.closest('.mobile-menu-toggle')) {
         this.showMobileMenu = false;
       }
     });

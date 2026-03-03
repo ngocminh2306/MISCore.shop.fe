@@ -1,13 +1,12 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { CartService } from '../../services/cart.service';
-import { Cart, CartItem } from '../../models/cart';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [RouterLink, DecimalPipe, CurrencyPipe],
+  imports: [RouterLink, CurrencyPipe],
   template: `
     <div class="container mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold text-gray-800 mb-8">Giỏ hàng của bạn</h1>
@@ -148,7 +147,7 @@ export class CartComponent {
   });
 
   updateQuantity(productId: number, quantity: number): void {
-    if(quantity <= 0) {
+    if (quantity <= 0) {
       this.removeFromCart(productId);
       return;
     }

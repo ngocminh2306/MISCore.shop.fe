@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { BannerService } from '../../../../public-api/api/banner.service';
 import { FileService } from '../../../../public-api/api/file.service';
 import { CommonTableComponent, TableColumn } from '../../../components/common-table/common-table.component';
@@ -26,7 +25,7 @@ interface Banner {
 @Component({
   selector: 'app-admin-banners',
   standalone: true,
-  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, DatePipe, CommonTableComponent, ConfirmDialogComponent],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -370,7 +369,7 @@ export class AdminBannersComponent implements OnInit {
   constructor(
     private bannerService: BannerService,
     private fileService: FileService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadBanners();
@@ -624,7 +623,7 @@ export class AdminBannersComponent implements OnInit {
     }
 
     // Prepare the request body according to BannerDto
-    const updateDto: BannerDto  = {
+    const updateDto: BannerDto = {
       title: this.bannerFormModel.title,
       description: this.bannerFormModel.description || null,
       imageUrl: imageUrl || '',
@@ -718,7 +717,7 @@ export class AdminBannersComponent implements OnInit {
 
   // Common Table event handlers
   handleAction(actionName: string, item: any): void {
-    switch(actionName) {
+    switch (actionName) {
       case 'edit':
         this.openEditModal(item);
         break;

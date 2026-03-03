@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-shipping-info',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   template: `
     <div class="max-w-4xl mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold text-gray-800 mb-6">Shipping Information</h1>

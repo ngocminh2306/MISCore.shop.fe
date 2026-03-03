@@ -1,5 +1,4 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { SellerService } from '../../../../public-api/api/seller.service';
@@ -12,7 +11,7 @@ import { LanguageService } from '../../../services/language.service';
 @Component({
   selector: 'app-admin-sellers',
   standalone: true,
-  imports: [RouterLink, FormsModule, DatePipe, TranslatePipe],
+  imports: [FormsModule, DatePipe, TranslatePipe],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -457,7 +456,7 @@ export class AdminSellersComponent implements OnInit {
   sellerUsers = signal<any[]>([]);
   showProductsTab = signal(true); // To switch between tabs
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit(): void {
     this.loadSellers();
@@ -465,7 +464,7 @@ export class AdminSellersComponent implements OnInit {
 
   loadSellers(): void {
     this.loading.set(true);
-    
+
     // Using SellerService to get all sellers
     this.sellerService.apiSellerSellersGet(
       this.currentPage(),
@@ -515,7 +514,7 @@ export class AdminSellersComponent implements OnInit {
 
   toggleSellerStatus(sellerId: number, newStatus: boolean): void {
     this.loading.set(true);
-    
+
     if (newStatus) {
       this.sellerService.apiSellerActivateSellerIdPost(sellerId).subscribe({
         next: () => {
@@ -541,7 +540,7 @@ export class AdminSellersComponent implements OnInit {
 
   verifySeller(sellerId: number): void {
     this.loading.set(true);
-    
+
     this.sellerService.apiSellerVerifySellerIdPost(sellerId).subscribe({
       next: () => {
         this.loadSellers();
@@ -680,7 +679,7 @@ export class AdminSellersComponent implements OnInit {
     const pageNumbers: number[] = [];
     const currentPage = this.currentPage();
     const totalPages = this.totalPages();
-    
+
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
@@ -691,21 +690,21 @@ export class AdminSellersComponent implements OnInit {
         pageNumbers.push(1);
         if (currentPage > 4) pageNumbers.push(-1); // ellipsis
       }
-      
+
       // Show up to 5 pages centered around current page
       const start = Math.max(1, currentPage - 2);
       const end = Math.min(totalPages, currentPage + 2);
-      
+
       for (let i = start; i <= end; i++) {
         pageNumbers.push(i);
       }
-      
+
       if (currentPage < totalPages - 2) {
         if (currentPage < totalPages - 3) pageNumbers.push(-1); // ellipsis
         pageNumbers.push(totalPages);
       }
     }
-    
+
     return pageNumbers;
   }
 }

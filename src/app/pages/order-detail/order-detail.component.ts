@@ -1,13 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Order, OrderDto, OrderService } from '../../../public-api';
+import { OrderDto, OrderService } from '../../../public-api';
 import { MessageDialogService } from '../../services/message-dialog.service';
-import { NgClass, NgIf, DecimalPipe, DatePipe, CommonModule, CurrencyPipe } from '@angular/common';
+import { NgClass, NgIf, DatePipe, CommonModule, CurrencyPipe } from '@angular/common';
 
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgIf, NgClass, DecimalPipe, DatePipe, CurrencyPipe],
+  imports: [CommonModule, RouterLink, NgIf, NgClass, DatePipe, CurrencyPipe],
   template: `
     <div class="max-w-4xl mx-auto px-4 py-8">
       <div class="mb-6">
@@ -236,7 +236,7 @@ export class OrderDetailComponent implements OnInit {
           // If response structure is different
           this.order = response;
         }
-        
+
         this.orderNumber = this.order?.orderNumber || orderId.toString();
         this.loading = false;
       },

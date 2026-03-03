@@ -1,10 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CategoryService } from '../../../../public-api/api/category.service';
 import { FileService } from '../../../../public-api/api/file.service';
-import { Category } from '../../../models';
 import { CommonTableComponent, TableColumn } from '../../../components/common-table/common-table.component';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -16,7 +14,7 @@ import { MessageDialogService } from '../../../services/message-dialog.service';
 @Component({
   selector: 'app-admin-categories',
   standalone: true,
-  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent, TranslatePipe],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent, TranslatePipe],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -348,7 +346,7 @@ export class AdminCategoriesComponent {
   constructor(
     private categoryService: CategoryService,
     private fileService: FileService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadCategories();
@@ -449,19 +447,19 @@ export class AdminCategoriesComponent {
   getPageNumbers(): number[] {
     const totalVisiblePages = 5;
     const pages: number[] = [];
-    
+
     let startPage = Math.max(1, this.currentPage - Math.floor(totalVisiblePages / 2));
     let endPage = Math.min(this.totalPages, startPage + totalVisiblePages - 1);
-    
+
     // Adjust start page if needed to ensure enough pages are shown
     if (endPage - startPage + 1 < totalVisiblePages) {
       startPage = Math.max(1, endPage - totalVisiblePages + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   }
 
@@ -514,7 +512,7 @@ export class AdminCategoriesComponent {
   }
 
   handleAction(actionName: string, item: any): void {
-    switch(actionName) {
+    switch (actionName) {
       case 'edit':
         this.openEditModal(item);
         break;
@@ -634,7 +632,7 @@ export class AdminCategoriesComponent {
     this.isUploading = true;
     try {
       // Upload the file using the file service
-      const response = await lastValueFrom(this.fileService.apiFileUploadImagePost('category' , this.selectedFile));
+      const response = await lastValueFrom(this.fileService.apiFileUploadImagePost('category', this.selectedFile));
       this.isUploading = false;
       return response?.data || null;
     } catch (error) {

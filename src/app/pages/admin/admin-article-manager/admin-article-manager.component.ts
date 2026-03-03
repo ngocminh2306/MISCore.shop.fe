@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Title, Meta } from '@angular/platform-browser';
@@ -10,7 +9,7 @@ import { QuillModule } from 'ngx-quill';
 @Component({
   selector: 'app-admin-article-manager',
   standalone: true,
-  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent, QuillModule],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent, QuillModule],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -389,9 +388,9 @@ export class AdminArticleManagerComponent {
       ['bold', 'italic', 'underline', 'strike'],
       ['blockquote', 'code-block'],
       [{ 'header': 1 }, { 'header': 2 }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'script': 'sub'}, { 'script': 'super' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      [{ 'script': 'sub' }, { 'script': 'super' }],
+      [{ 'indent': '-1' }, { 'indent': '+1' }],
       [{ 'direction': 'rtl' }],
       [{ 'size': ['small', false, 'large', 'huge'] }],
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -437,7 +436,7 @@ export class AdminArticleManagerComponent {
     }
   ];
 
-  constructor(private titleService: Title, private metaService: Meta) {}
+  constructor(private titleService: Title, private metaService: Meta) { }
 
   ngOnInit(): void {
     this.titleService.setTitle('Article Manager | Admin Panel');
@@ -620,7 +619,7 @@ export class AdminArticleManagerComponent {
   }
 
   handleAction(actionName: string, item: any): void {
-    switch(actionName) {
+    switch (actionName) {
       case 'view':
         this.openViewModal(item);
         break;
@@ -736,14 +735,14 @@ export class AdminArticleManagerComponent {
 
     this.loading = true;
     this.error = null;
-    
+
     // Prepare the request body
     const updateDto = {
       ...this.articleFormModel,
       categoryId: this.articleFormModel.categoryId ? parseInt(this.articleFormModel.categoryId.toString()) : null,
       authorId: this.articleFormModel.authorId ? parseInt(this.articleFormModel.authorId.toString()) : null
     };
-    
+
     // Simulated API call - replace with actual service call
     setTimeout(() => {
       console.log('Article updated successfully', updateDto);

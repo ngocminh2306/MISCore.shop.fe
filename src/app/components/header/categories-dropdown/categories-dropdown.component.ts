@@ -1,6 +1,5 @@
 import { Component, inject, Output, EventEmitter, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NgIf, NgFor } from '@angular/common';
 import { CategoryService } from '../../../../public-api/api/category.service';
 import { AuthService } from '../../../services/auth.service';
 
@@ -15,9 +14,9 @@ export interface Category {
 }
 
 @Component({
-  selector: 'misc-categories-dropdown',
+  selector: 'app-categories-dropdown',
   standalone: true,
-  imports: [RouterLink, NgIf, NgFor],
+  imports: [RouterLink],
   template: `
     <div class="relative category-menu-container" #categoryDropdown>
       <button

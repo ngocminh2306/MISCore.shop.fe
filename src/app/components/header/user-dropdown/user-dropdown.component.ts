@@ -1,6 +1,5 @@
 import { Component, inject, Output, EventEmitter } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NgIf, NgFor } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 
 interface MenuItem {
@@ -17,9 +16,9 @@ interface MenuSection {
 }
 
 @Component({
-  selector: 'misc-user-dropdown',
+  selector: 'app-user-dropdown',
   standalone: true,
-  imports: [RouterLink, NgIf, NgFor],
+  imports: [RouterLink],
   template: `
     <div class="relative user-menu-container">
       <button
@@ -262,10 +261,10 @@ export class UserDropdownComponent {
   getInitials(): string {
     const user = this.user();
     if (!user) return 'U';
-    
+
     const firstName = user.firstName || user.userName || 'User';
     const lastName = user.lastName || '';
-    
+
     if (lastName) {
       return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
     }

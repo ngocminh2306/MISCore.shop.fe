@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Title, Meta } from '@angular/platform-browser';
@@ -9,7 +8,7 @@ import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confi
 @Component({
   selector: 'app-admin-article-category',
   standalone: true,
-  imports: [RouterLink, FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -287,7 +286,7 @@ export class AdminArticleCategoryComponent {
     }
   ];
 
-  constructor(private titleService: Title, private metaService: Meta) {}
+  constructor(private titleService: Title, private metaService: Meta) { }
 
   ngOnInit(): void {
     this.titleService.setTitle('Article Categories | Admin Panel');
@@ -479,7 +478,7 @@ export class AdminArticleCategoryComponent {
   }
 
   handleAction(actionName: string, item: any): void {
-    switch(actionName) {
+    switch (actionName) {
       case 'edit':
         this.openEditModal(item);
         break;
@@ -587,7 +586,7 @@ export class AdminArticleCategoryComponent {
 
     this.loading = true;
     this.error = null;
-    
+
     // Prepare the request body
     const updateDto = {
       name: this.categoryFormModel.name,
@@ -601,7 +600,7 @@ export class AdminArticleCategoryComponent {
       metaDescription: this.categoryFormModel.metaDescription || null,
       metaKeywords: this.categoryFormModel.metaKeywords || null
     };
-    
+
     // Simulated API call - replace with actual service call
     setTimeout(() => {
       console.log('Category updated successfully', updateDto);

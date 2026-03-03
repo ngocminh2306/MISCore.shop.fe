@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MessageDialogService } from '../../services/message-dialog.service';
 import { AccountService } from '../../../public-api/api/account.service';
@@ -10,7 +10,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-edit-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './edit-profile.component.html',
   styleUrls: ['./edit-profile.component.css']
 })
@@ -92,7 +92,7 @@ export class EditProfileComponent implements OnInit {
   }
 
   onImageError(event: any): void {
-    event.target.src = 'https://placehold.co/200x200/f97316/ffffff?text=' + 
+    event.target.src = 'https://placehold.co/200x200/f97316/ffffff?text=' +
       this.getInitials(this.profileForm.get('firstName')?.value, this.profileForm.get('lastName')?.value);
   }
 
