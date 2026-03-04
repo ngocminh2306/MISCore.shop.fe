@@ -4,12 +4,11 @@ import { HeaderComponent } from '../components/header/header.component';
 import { FooterComponent } from '../components/footer/footer.component';
 import { ChatbotComponent } from '../components/chatbot/chatbot.component';
 import { BackToTopComponent } from '../components/back-to-top/back-to-top.component';
-import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent, ChatbotComponent, BackToTopComponent, NgIf],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, ChatbotComponent, BackToTopComponent],
   template: `
     <div class="min-h-screen flex flex-col bg-gray-50">
       <app-header></app-header>
@@ -36,12 +35,13 @@ import { NgIf } from '@angular/common';
           </button>
 
           <!-- Chat Window (hidden by default) -->
-          <div
-            *ngIf="showChat"
-            class="absolute bottom-20 right-0 w-80 h-[450px] bg-white rounded-lg shadow-xl overflow-hidden transition-all duration-300 transform z-10"
-            style="box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
-            <misc-chatbot (chatClosed)="closeChat()"></misc-chatbot>
-          </div>
+           @if(showChat) {
+            <div
+              class="absolute bottom-20 right-0 w-80 h-[450px] bg-white rounded-lg shadow-xl overflow-hidden transition-all duration-300 transform z-10"
+              style="box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+              <misc-chatbot (chatClosed)="closeChat()"></misc-chatbot>
+            </div>
+           }
         </div>
       </div>
     </div>

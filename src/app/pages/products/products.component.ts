@@ -114,7 +114,7 @@ import { CurrencyPipe } from '@angular/common';
             <!-- Products Grid -->
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-6 gap-6">
               @for (product of filteredProducts; track product.id) {
-                <misc-product-card [product]="product" (addToCart)="onAddToCart($event)" />
+                <app-product-card [product]="product" (addToCart)="onAddToCart($event)" />
               }
             </div>
           }

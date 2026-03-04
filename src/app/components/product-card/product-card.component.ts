@@ -5,7 +5,7 @@ import { CartService } from '../../services/cart.service';
 import { ProductDto } from '../../../public-api';
 
 @Component({
-  selector: 'misc-product-card',
+  selector: 'app-product-card',
   standalone: true,
   imports: [RouterLink, CurrencyPipe],
   template: `

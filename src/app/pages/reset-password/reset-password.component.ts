@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { MessageDialogService } from '../../services/message-dialog.service';
 import { AccountService } from '../../../public-api/api/account.service';
 import { CommonModule } from '@angular/common';
