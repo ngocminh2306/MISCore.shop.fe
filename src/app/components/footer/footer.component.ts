@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
-  selector: 'misc-footer',
+  selector: 'app-footer',
   standalone: true,
   imports: [RouterLink, TranslatePipe],
   template: `

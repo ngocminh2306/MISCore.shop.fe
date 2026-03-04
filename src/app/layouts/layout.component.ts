@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../components/header/header.component';
 import { FooterComponent } from '../components/footer/footer.component';
 import { ChatbotComponent } from '../components/chatbot/chatbot.component';
@@ -12,16 +12,16 @@ import { NgIf } from '@angular/common';
   imports: [RouterOutlet, HeaderComponent, FooterComponent, ChatbotComponent, BackToTopComponent, NgIf],
   template: `
     <div class="min-h-screen flex flex-col bg-gray-50">
-      <misc-header></misc-header>
+      <app-header></app-header>
 
       <main class="flex-grow">
         <router-outlet></router-outlet>
       </main>
 
-      <misc-footer></misc-footer>
+      <app-footer></app-footer>
 
       <!-- Back to Top Button -->
-      <misc-back-to-top></misc-back-to-top>
+      <app-back-to-top></app-back-to-top>
 
       <!-- Chat Bot Floating Button -->
       <div class="fixed bottom-14 right-6 z-50">
@@ -56,6 +56,7 @@ export class LayoutComponent implements OnInit {
   showChat = false;
 
   ngOnInit(): void {
+    console.log('LayoutComponent initialized');
   }
 
   toggleChat(): void {

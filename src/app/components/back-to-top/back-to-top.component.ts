@@ -4,7 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
 
 @Component({
-  selector: 'misc-back-to-top',
+  selector: 'app-back-to-top',
   standalone: true,
   imports: [CommonModule],
   template: `
