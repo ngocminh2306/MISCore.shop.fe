@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MessageDialogService } from '../../services/message-dialog.service';
-import { CurrencyPipe, NgIf } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { AccountService, AddressService, OrderService, VnPayService } from '../../../public-api';
 import { CartService } from '../../services/cart.service';
 import { isPlatformBrowser } from '@angular/common';
@@ -40,7 +40,7 @@ interface CartSummary {
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, CurrencyPipe],
+  imports: [ReactiveFormsModule, CurrencyPipe],
   template: `
     <div class="container mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold text-gray-800 mb-8">Checkout</h1>
@@ -59,8 +59,9 @@ interface CartSummary {
 
           <!-- Existing Address Selection -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Select Shipping Address</label>
+            <label for="shippingAddress" class="block text-sm font-medium text-gray-700 mb-1">Select Shipping Address</label>
             <select
+              id="shippingAddress"
               (change)="onShippingAddressChange($event)"
               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               [disabled]="showShippingAddressForm">
@@ -79,91 +80,115 @@ interface CartSummary {
             <form [formGroup]="checkoutForm" class="space-y-4 mb-6 border p-4 rounded-md">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                   <input
                     type="text"
+                    id="firstName"
                     formControlName="firstName"
                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('firstName')?.invalid && checkoutForm.get('firstName')?.touched" class="text-red-500 text-sm mt-1">
-                    First name is required and must be at least 2 characters
-                  </div>
+                  @if(checkoutForm.get('firstName')?.invalid && checkoutForm.get('firstName')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      First name is required and must be at least 2 characters
+                    </div>
+                  }
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                   <input
                     type="text"
+                    id="lastName"
                     formControlName="lastName"
                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('lastName')?.invalid && checkoutForm.get('lastName')?.touched" class="text-red-500 text-sm mt-1">
-                    Last name is required and must be at least 2 characters
-                  </div>
+                    @if(checkoutForm.get('lastName')?.invalid && checkoutForm.get('lastName')?.touched){
+                      <div class="text-red-500 text-sm mt-1">
+                        Last name is required and must be at least 2 characters
+                      </div>
+                    }
                 </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
                 <input
                   type="text"
+                  id="address"
                   formControlName="address"
                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <div *ngIf="checkoutForm.get('address')?.invalid && checkoutForm.get('address')?.touched" class="text-red-500 text-sm mt-1">
-                  Address is required and must be at least 5 characters
-                </div>
+                  @if(checkoutForm.get('address')?.invalid && checkoutForm.get('address')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      Address is required and must be at least 5 characters
+                    </div>
+                  }
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
                   <input
                     type="text"
+                    id="city"
                     formControlName="city"
                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('city')?.invalid && checkoutForm.get('city')?.touched" class="text-red-500 text-sm mt-1">
-                    City is required and must be at least 2 characters
-                  </div>
+                    @if(checkoutForm.get('city')?.invalid && checkoutForm.get('city')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      City is required and must be at least 2 characters
+                    </div>
+                    }
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                  <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
                   <input
                     type="text"
+                    id="state"
                     formControlName="state"
                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('state')?.invalid && checkoutForm.get('state')?.touched" class="text-red-500 text-sm mt-1">
-                    State is required and must be at least 2 characters
-                  </div>
+                  @if(checkoutForm.get('state')?.invalid && checkoutForm.get('state')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      State is required and must be at least 2 characters
+                    </div>
+                  }
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                  <label for="zipCode" class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
                   <input
                     type="text"
+                    id="zipCode"
                     formControlName="zipCode"
                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('zipCode')?.invalid && checkoutForm.get('zipCode')?.touched" class="text-red-500 text-sm mt-1">
-                    ZIP code is required and must be 5 digits
-                  </div>
+                  @if(checkoutForm.get('zipCode')?.invalid && checkoutForm.get('zipCode')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      ZIP code is required and must be 5 digits
+                    </div>
+                  }
                 </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                 <input
                   type="tel"
+                  id="phone"
                   formControlName="phone"
                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('phone')?.invalid && checkoutForm.get('phone')?.touched" class="text-red-500 text-sm mt-1">
-                    Phone number is required and must be valid
-                  </div>
+                  @if(checkoutForm.get('phone')?.invalid && checkoutForm.get('phone')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      Phone number is required and must be valid
+                    </div>
+                  }
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
                   type="email"
+                  id="email"
                   formControlName="email"
                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('email')?.invalid && checkoutForm.get('email')?.touched" class="text-red-500 text-sm mt-1">
-                    Email is required and must be valid
-                  </div>
+                  @if(checkoutForm.get('email')?.invalid && checkoutForm.get('email')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      Email is required and must be valid
+                    </div>
+                  }
               </div>
 
               <button
@@ -180,91 +205,115 @@ interface CartSummary {
               <!-- If no address form is shown, just show the form fields -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                   <input
                     type="text"
+                    id="firstName"
                     formControlName="firstName"
                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('firstName')?.invalid && checkoutForm.get('firstName')?.touched" class="text-red-500 text-sm mt-1">
-                    First name is required and must be at least 2 characters
-                  </div>
+                  @if(checkoutForm.get('firstName')?.invalid && checkoutForm.get('firstName')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      First name is required and must be at least 2 characters
+                    </div>
+                  }
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                   <input
                     type="text"
+                    id="lastName"
                     formControlName="lastName"
                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('lastName')?.invalid && checkoutForm.get('lastName')?.touched" class="text-red-500 text-sm mt-1">
-                    Last name is required and must be at least 2 characters
-                  </div>
+                  @if(checkoutForm.get('lastName')?.invalid && checkoutForm.get('lastName')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      Last name is required and must be at least 2 characters
+                    </div>
+                  }
                 </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
                 <input
                   type="text"
+                  id="address"
                   formControlName="address"
                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <div *ngIf="checkoutForm.get('address')?.invalid && checkoutForm.get('address')?.touched" class="text-red-500 text-sm mt-1">
-                  Address is required and must be at least 5 characters
-                </div>
+                @if(checkoutForm.get('address')?.invalid && checkoutForm.get('address')?.touched){
+                  <div class="text-red-500 text-sm mt-1">
+                    Address is required and must be at least 5 characters
+                  </div>
+                }
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
                   <input
                     type="text"
+                    id="city"
                     formControlName="city"
                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('city')?.invalid && checkoutForm.get('city')?.touched" class="text-red-500 text-sm mt-1">
-                    City is required and must be at least 2 characters
-                  </div>
+                  @if(checkoutForm.get('city')?.invalid && checkoutForm.get('city')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      City is required and must be at least 2 characters
+                    </div>
+                  }
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                  <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
                   <input
                     type="text"
+                    id="state"
                     formControlName="state"
                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('state')?.invalid && checkoutForm.get('state')?.touched" class="text-red-500 text-sm mt-1">
-                    State is required and must be at least 2 characters
-                  </div>
+                  @if(checkoutForm.get('state')?.invalid && checkoutForm.get('state')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      State is required and must be at least 2 characters
+                    </div>
+                  }
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                  <label for="zipCode" class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
                   <input
                     type="text"
+                    id="zipCode"
                     formControlName="zipCode"
                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('zipCode')?.invalid && checkoutForm.get('zipCode')?.touched" class="text-red-500 text-sm mt-1">
-                    ZIP code is required and must be 5 digits
-                  </div>
+                  @if(checkoutForm.get('zipCode')?.invalid && checkoutForm.get('zipCode')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      ZIP code is required and must be 5 digits
+                    </div>
+                  }
                 </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                 <input
                   type="tel"
+                  id="phone"
                   formControlName="phone"
                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('phone')?.invalid && checkoutForm.get('phone')?.touched" class="text-red-500 text-sm mt-1">
-                    Phone number is required and must be valid
-                  </div>
+                  @if(checkoutForm.get('phone')?.invalid && checkoutForm.get('phone')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      Phone number is required and must be valid
+                    </div>
+                  }
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
                   type="email"
+                  id="email"
                   formControlName="email"
                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <div *ngIf="checkoutForm.get('email')?.invalid && checkoutForm.get('email')?.touched" class="text-red-500 text-sm mt-1">
-                    Email is required and must be valid
-                  </div>
+                  @if(checkoutForm.get('email')?.invalid && checkoutForm.get('email')?.touched){
+                    <div class="text-red-500 text-sm mt-1">
+                      Email is required and must be valid
+                    </div>
+                  }
               </div>
             </form>
           }
@@ -286,8 +335,9 @@ interface CartSummary {
             @if(!checkoutForm.get('isSameAsShipping')?.value) {
               <!-- Billing Address Selection -->
               <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Select Billing Address</label>
+                <label for="billingAddress" class="block text-sm font-medium text-gray-700 mb-1">Select Billing Address</label>
                 <select
+                  id="billingAddress"
                   (change)="onBillingAddressChange($event)"
                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   [disabled]="showBillingAddressForm">
@@ -308,48 +358,54 @@ interface CartSummary {
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                      <label for="billingFirstName" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                       <input
                         type="text"
+                        id="billingFirstName"
                         formControlName="billingFirstName"
                         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                      <label for="billingLastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                       <input
                         type="text"
+                        id="billingLastName"
                         formControlName="billingLastName"
                         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <label for="billingAddress" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
                     <input
                       type="text"
+                      id="billingAddress"
                       formControlName="billingAddress"
                       class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                   </div>
 
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                      <label for="billingCity" class="block text-sm font-medium text-gray-700 mb-1">City</label>
                       <input
                         type="text"
+                        id="billingCity"
                         formControlName="billingCity"
                         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                      <label for="billingState" class="block text-sm font-medium text-gray-700 mb-1">State</label>
                       <input
                         type="text"
+                        id="billingState"
                         formControlName="billingState"
                         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                      <label for="billingZipCode" class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
                       <input
                         type="text"
+                        id="billingZipCode"
                         formControlName="billingZipCode"
                         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
@@ -370,48 +426,54 @@ interface CartSummary {
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                      <label for="billingFirstNameDisplay" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                       <input
                         type="text"
+                        id="billingFirstNameDisplay"
                         formControlName="billingFirstName"
                         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                      <label for="billingLastNameDisplay" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                       <input
                         type="text"
+                        id="billingLastNameDisplay"
                         formControlName="billingLastName"
                         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <label for="billingAddressDisplay" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
                     <input
                       type="text"
+                      id="billingAddressDisplay"
                       formControlName="billingAddress"
                       class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                   </div>
 
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                      <label for="billingCityDisplay" class="block text-sm font-medium text-gray-700 mb-1">City</label>
                       <input
                         type="text"
+                        id="billingCityDisplay"
                         formControlName="billingCity"
                         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                      <label for="billingStateDisplay" class="block text-sm font-medium text-gray-700 mb-1">State</label>
                       <input
                         type="text"
+                        id="billingStateDisplay"
                         formControlName="billingState"
                         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                      <label for="billingZipCodeDisplay" class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
                       <input
                         type="text"
+                        id="billingZipCodeDisplay"
                         formControlName="billingZipCode"
                         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
@@ -462,9 +524,10 @@ interface CartSummary {
           <div class="mb-6">
             <h3 class="text-lg font-semibold mb-3">Payment Method</h3>
             <div class="space-y-2">
-              <label class="flex items-center">
+              <label for="creditCard" class="flex items-center">
                 <input
                   type="radio"
+                  id="creditCard"
                   name="paymentMethod"
                   value="creditCard"
                   formControlName="paymentMethod"
@@ -472,27 +535,30 @@ interface CartSummary {
                   checked>
                 <span>Credit Card</span>
               </label>
-              <label class="flex items-center">
+              <label for="paypal" class="flex items-center">
                 <input
                   type="radio"
+                  id="paypal"
                   name="paymentMethod"
                   value="paypal"
                   formControlName="paymentMethod"
                   class="mr-2">
                 <span>PayPal</span>
               </label>
-              <label class="flex items-center">
+              <label for="bankTransfer" class="flex items-center">
                 <input
                   type="radio"
+                  id="bankTransfer"
                   name="paymentMethod"
                   value="bankTransfer"
                   formControlName="paymentMethod"
                   class="mr-2">
                 <span>Bank Transfer</span>
               </label>
-              <label class="flex items-center">
+              <label for="vnpay" class="flex items-center">
                 <input
                   type="radio"
+                  id="vnpay"
                   name="paymentMethod"
                   value="vnpay"
                   formControlName="paymentMethod"
