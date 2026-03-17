@@ -1,0 +1,45 @@
+name: Angular CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout Code
+      - uses: actions/checkout@v4
+
+      # 2. Setup Node.js (Match your .nvmrc or package.json engine)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # Or your preferred LTS version
+          cache: "npm" # Automatically caches node_modules
+
+      # 3. Install Dependencies
+      - name: Install Dependencies
+        run: npm ci
+
+      # 4. Lint
+      - name: Run Linting
+        run: npm run lint
+
+      # 5. Test (with coverage)
+      - name: Run Tests
+        run: npm run test -- --no-watch --code-coverage --browsers=ChromeHeadless
+
+      # 6. Build (Production)
+      - name: Build Production
+        run: npm run build -- --configuration production
+
+      # 7. Upload Build Artifacts (Optional)
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-folder
+          path: dist/
