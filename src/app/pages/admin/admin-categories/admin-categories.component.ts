@@ -1,22 +1,25 @@
-import { Component, inject } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CategoryDto } from '../../../../public-api/model/categoryDto';
 import { CategoryService } from '../../../../public-api/api/category.service';
 import { FileService } from '../../../../public-api/api/file.service';
-import { CommonTableComponent, TableColumn } from '../../../components/common-table/common-table.component';
+import { CommonTableComponent, TableColumn, PaginationConfig, FilterConfig } from '../../../components/common-table/common-table.component';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { LanguageService } from '../../../services/language.service';
-import { lastValueFrom } from 'rxjs';
 import { MessageDialogService } from '../../../services/message-dialog.service';
+import { lastValueFrom } from 'rxjs';
 
+interface CategoryTableItem extends CategoryDto {
+  displayName: string;
+}
 
 @Component({
   selector: 'app-admin-categories',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent, TranslatePipe],
+  imports: [FormsModule, CommonTableComponent, ConfirmDialogComponent, TranslatePipe],
   template: `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">{{ 'Admin Categories' | translate }}</h1>
         <div class="mt-4 flex justify-between items-center">
@@ -37,16 +40,8 @@ import { MessageDialogService } from '../../../services/message-dialog.service';
         tableName="categories"
         [loading]="loading"
         [error]="error"
-        [paginationConfig]="{
-          currentPage: currentPage,
-          pageSize: pageSize,
-          totalItems: totalCount,
-          totalPages: totalPages
-        }"
-        [filterConfig]="{
-          searchTerm: searchTerm,
-          filters: { status: statusFilter }
-        }"
+        [paginationConfig]="paginationConfig"
+        [filterConfig]="filterConfig"
         [showActions]="true"
         [rowActions]="[
           { name: 'edit', title: 'Edit' | translate, color: 'indigo' },
@@ -136,51 +131,41 @@ import { MessageDialogService } from '../../../services/message-dialog.service';
 
                   <!-- File preview -->
                    @if(filePreview) {
-                    @if(filePreview) {
-                      <div class="mt-3">
-                        <div class="flex items-center justify-between">
-                          <div class="flex items-center">
-                            @if(filePreview && selectedFile) {
-                              <img
-                                [src]="filePreview"
-                                alt="Preview"
-                                class="w-16 h-16 object-cover rounded-md border"
-                              >
-                            } @else {
-                              <img
-                                [src]="filePreview"
-                                alt="Current Image"
-                                class="w-16 h-16 object-cover rounded-md border"
-                              >
-                            }
-                            @if(selectedFile) {
-                              <span class="ml-3 text-sm text-gray-600 truncate max-w-xs">
-                                {{ selectedFile.name }}
-                              </span>
-                            }
-                          </div>
-                          <button
-                            type="button"
-                            (click)="removeFile()"
-                            class="ml-3 inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-red-500 hover:text-red-700 focus:outline-none"
+                    <div class="mt-3">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                          <img
+                            [src]="filePreview"
+                            alt="Preview"
+                            class="w-16 h-16 object-cover rounded-md border"
                           >
-                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                          </button>
+                          @if(selectedFile) {
+                            <span class="ml-3 text-sm text-gray-600 truncate max-w-xs">
+                              {{ selectedFile.name }}
+                            </span>
+                          }
                         </div>
-
-                        <!-- Show uploading status -->
-                         @if(isUploading) {
-                          <div class="mt-2">
-                            <div class="flex items-center">
-                              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
-                              <span class="ml-2 text-sm text-gray-600">{{ 'Uploading...' | translate }}</span>
-                            </div>
-                          </div>
-                         }
+                        <button
+                          type="button"
+                          (click)="removeFile()"
+                          class="ml-3 inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-red-500 hover:text-red-700 focus:outline-none"
+                        >
+                          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                        </button>
                       </div>
-                    }
+
+                      <!-- Show uploading status -->
+                       @if(isUploading) {
+                        <div class="mt-2">
+                          <div class="flex items-center">
+                            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+                            <span class="ml-2 text-sm text-gray-600">{{ 'Uploading...' | translate }}</span>
+                          </div>
+                        </div>
+                       }
+                    </div>
                    }
                 </div>
 
@@ -243,8 +228,9 @@ import { MessageDialogService } from '../../../services/message-dialog.service';
                   <label for="isActive" class="ml-2 block text-sm text-gray-700">{{ 'Active' | translate }}</label>
                 </div>
               </div>
+              </div>
 
-              <div class="mt-6 flex justify-end space-x-3">
+              <div class="mt-6 flex justify-end space-x-3 px-6 pb-6">
                 <button
                   type="button"
                   (click)="closeModal()"
@@ -259,7 +245,6 @@ import { MessageDialogService } from '../../../services/message-dialog.service';
                 >
                   {{ editingCategory ? ('Update Category' | translate) : ('Create Category' | translate) }}
                 </button>
-                </div>
               </div>
             </form>
           </div>
@@ -286,21 +271,67 @@ import { MessageDialogService } from '../../../services/message-dialog.service';
     }
   `]
 })
-export class AdminCategoriesComponent {
-  categories: any[] = [];
-  searchTerm = '';
-  statusFilter = '';
-  currentPage = 1;
-  pageSize = 10;
-  totalCount = 0;
-  totalPages = 0;
-  deletingId: number | null = null;
+export class AdminCategoriesComponent implements OnInit {
+  private languageService = inject(LanguageService);
+  private messageDialogService = inject(MessageDialogService);
+  private categoryService = inject(CategoryService);
+  private fileService = inject(FileService);
+  private cdr = inject(ChangeDetectorRef);
+
+  categories: CategoryTableItem[] = [];
   loading = false;
   error: string | null = null;
 
+  // Pagination configuration
+  paginationConfig: PaginationConfig = {
+    currentPage: 1,
+    pageSize: 10,
+    totalItems: 0,
+    totalPages: 0
+  };
+
+  // Filter configuration
+  filterConfig: FilterConfig = {
+    searchTerm: '',
+    filters: {
+      status: ''
+    }
+  };
+
+  // Table configuration
+  tableColumns: TableColumn[] = [
+    {
+      key: 'displayName',
+      title: 'Category',
+      sortable: true,
+      width: '40%'
+    },
+    {
+      key: 'imageUrl',
+      title: 'Image',
+      sortable: false,
+      type: 'image',
+      width: '20%'
+    },
+    {
+      key: 'activeProductsCount',
+      title: 'Active Products',
+      sortable: true,
+      type: 'number',
+      width: '20%'
+    },
+    {
+      key: 'isActive',
+      title: 'Status',
+      sortable: true,
+      type: 'boolean',
+      width: '20%'
+    }
+  ];
+
   // Category form modal
   showModal = false;
-  editingCategory: any = null;
+  editingCategory: CategoryTableItem | null = null;
   categoryFormModel = {
     name: '',
     description: '',
@@ -326,42 +357,6 @@ export class AdminCategoriesComponent {
   confirmDialogCancelText = '';
   categoryToDelete: number | null = null;
 
-  // Table configuration
-  tableColumns: TableColumn[] = [
-    {
-      key: 'displayName',
-      title: 'Category',
-      sortable: true,
-      width: '40%'
-    },
-    {
-      key: 'imageUrl',
-      title: 'Iamge',
-      sortable: false,
-      type: 'image',
-      width: '20%'
-    },
-    {
-      key: 'activeProductsCount',
-      title: 'Active Products',
-      sortable: true,
-      type: 'text',
-      width: '20%'
-    },
-    {
-      key: 'isActive',
-      title: 'Status',
-      sortable: true,
-      type: 'boolean',
-      width: '20%'
-    }
-  ];
-
-  private languageService = inject(LanguageService);
-  private messageDialogService = inject(MessageDialogService);
-  private categoryService = inject(CategoryService);
-  private fileService = inject(FileService);
-
   ngOnInit(): void {
     this.loadCategories();
   }
@@ -370,60 +365,63 @@ export class AdminCategoriesComponent {
     this.loading = true;
     this.error = null;
 
-    // Call the API to get categories
     this.categoryService.apiCategoryGet().subscribe({
-      next: (response: any) => {
-        let allCategories = (response?.data || []).map((cat: any) => ({
+      next: (response) => {
+        const allCategories = (response?.data || []).map((cat: CategoryDto) => ({
+          ...cat,
           id: cat.id || 0,
           name: cat.name || '',
           description: cat.description || '',
-          isActive: cat.isActive || false,
-          activeProductsCount: cat.activeProductsCount || 0,
-          createdAt: cat.createdAt ? new Date(cat.createdAt) : new Date(),
-          updatedAt: cat.updatedAt ? new Date(cat.updatedAt) : undefined,
+          isActive: cat.isActive ?? false,
+          activeProductsCount: cat.activeProductsCount ?? 0,
           slug: cat.slug || '',
           imageUrl: cat.imageUrl || '',
-          sortOrder: cat.sortOrder || 0,
+          sortOrder: cat.sortOrder ?? 0,
           metaTitle: cat.metaTitle || '',
           metaDescription: cat.metaDescription || '',
           metaKeywords: cat.metaKeywords || '',
-          // Create a formatted name field for display in the table
           displayName: this.formatCategoryDisplay(cat.name || '', cat.description || '')
         }));
 
         // Apply client-side filtering
-        let filteredCategories = allCategories.filter((category: any) => {
-          // Apply search filter
-          const matchesSearch = !this.searchTerm ||
-            category.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-            category.description.toLowerCase().includes(this.searchTerm.toLowerCase());
+        const filteredCategories = this.applyFilters(allCategories);
 
-          // Apply status filter
-          const matchesStatus = !this.statusFilter ||
-            (this.statusFilter === 'active' && category.isActive) ||
-            (this.statusFilter === 'inactive' && !category.isActive);
-
-          return matchesSearch && matchesStatus;
-        });
-
-        // Calculate pagination values
-        this.totalCount = filteredCategories.length;
-        this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+        // Update pagination
+        this.paginationConfig.totalItems = filteredCategories.length;
+        this.paginationConfig.totalPages = Math.ceil(filteredCategories.length / this.paginationConfig.pageSize);
 
         // Apply client-side pagination
-        const startIndex = (this.currentPage - 1) * this.pageSize;
-        const endIndex = startIndex + this.pageSize;
+        const startIndex = (this.paginationConfig.currentPage - 1) * this.paginationConfig.pageSize;
+        const endIndex = startIndex + this.paginationConfig.pageSize;
         this.categories = filteredCategories.slice(startIndex, endIndex);
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading categories:', error);
         this.categories = [];
-        this.totalCount = 0;
-        this.totalPages = 0;
+        this.paginationConfig.totalItems = 0;
+        this.paginationConfig.totalPages = 0;
         this.loading = false;
         this.error = this.languageService.getTranslation('Error loading categories. Please try again later.');
       }
+    });
+  }
+
+  private applyFilters(categories: CategoryTableItem[]): CategoryTableItem[] {
+    return categories.filter((category) => {
+      // Apply search filter
+      const matchesSearch = !this.filterConfig.searchTerm ||
+        category.name?.toLowerCase().includes(this.filterConfig.searchTerm.toLowerCase()) ||
+        category.description?.toLowerCase().includes(this.filterConfig.searchTerm.toLowerCase());
+
+      // Apply status filter
+      const statusFilter = this.filterConfig.filters['status'];
+      const matchesStatus = !statusFilter ||
+        (statusFilter === 'active' && category.isActive) ||
+        (statusFilter === 'inactive' && !category.isActive);
+
+      return matchesSearch && matchesStatus;
     });
   }
 
@@ -431,53 +429,31 @@ export class AdminCategoriesComponent {
     return `${name} ${description ? `(${description})` : ''}`;
   }
 
-  applyFilters(): void {
-    // Reset to first page when applying filters
-    this.currentPage = 1;
+  handleAction(actionName: string, item: CategoryTableItem): void {
+    switch (actionName) {
+      case 'edit':
+        this.openEditModal(item);
+        break;
+      case 'delete':
+        if (item.id) {
+          this.deleteCategory(item.id);
+        }
+        break;
+    }
+  }
+
+  onPageChange(pageConfig: PaginationConfig): void {
+    this.paginationConfig = pageConfig;
     this.loadCategories();
   }
 
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.loadCategories();
-    }
+  onFilterChange(filterConfig: FilterConfig): void {
+    this.filterConfig = filterConfig;
+    this.paginationConfig.currentPage = 1;
+    this.loadCategories();
   }
 
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.loadCategories();
-    }
-  }
-
-  goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
-      this.currentPage = page;
-      this.loadCategories();
-    }
-  }
-
-  getPageNumbers(): number[] {
-    const totalVisiblePages = 5;
-    const pages: number[] = [];
-
-    let startPage = Math.max(1, this.currentPage - Math.floor(totalVisiblePages / 2));
-    let endPage = Math.min(this.totalPages, startPage + totalVisiblePages - 1);
-
-    // Adjust start page if needed to ensure enough pages are shown
-    if (endPage - startPage + 1 < totalVisiblePages) {
-      startPage = Math.max(1, endPage - totalVisiblePages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  }
-
-  // Improved delete method using confirm dialog
+  // Delete methods
   deleteCategory(id: number): void {
     this.categoryToDelete = id;
     this.confirmDialogTitle = this.languageService.getTranslation('Delete Category');
@@ -487,66 +463,34 @@ export class AdminCategoriesComponent {
     this.showConfirmDialog = true;
   }
 
-  getCurrentPageEnd(): number {
-    return Math.min(this.currentPage * this.pageSize, this.totalCount);
-  }
-
-  // Handle confirm delete
   onConfirmDelete(): void {
     if (this.categoryToDelete !== null) {
-      this.deletingId = this.categoryToDelete; // Set loading state
-
       this.categoryService.apiCategoryIdDelete(this.categoryToDelete).subscribe({
         next: () => {
-          console.log('Category deleted successfully');
-          // Reset deletingId
-          this.deletingId = null;
+          this.messageDialogService.success(
+            this.languageService.getTranslation('Category deleted successfully!'),
+            this.languageService.getTranslation('Success')
+          );
           this.categoryToDelete = null;
-          // Reload categories after deletion
-          this.loadCategories();
           this.showConfirmDialog = false;
+          this.loadCategories();
         },
         error: (error) => {
           console.error('Error deleting category:', error);
-          // Reset deletingId on error
-          this.deletingId = null;
           this.categoryToDelete = null;
           this.showConfirmDialog = false;
-          // Show user-friendly error message
-          this.messageDialogService.error('Error deleting category: ' + (error?.error?.message || error?.message || 'Please try again.'), 'Error');
+          this.messageDialogService.error(
+            this.languageService.getTranslation('Error deleting category. Please try again.'),
+            this.languageService.getTranslation('Error')
+          );
         }
       });
     }
   }
 
-  // Handle cancel delete
   onCancelDelete(): void {
     this.showConfirmDialog = false;
     this.categoryToDelete = null;
-  }
-
-  handleAction(actionName: string, item: any): void {
-    switch (actionName) {
-      case 'edit':
-        this.openEditModal(item);
-        break;
-      case 'delete':
-        this.deleteCategory(item.id);
-        break;
-    }
-  }
-
-  onPageChange(pageConfig: any): void {
-    this.currentPage = pageConfig.currentPage;
-    this.pageSize = pageConfig.pageSize;
-    this.loadCategories();
-  }
-
-  onFilterChange(filterConfig: any): void {
-    this.searchTerm = filterConfig.searchTerm;
-    this.statusFilter = filterConfig.filters?.status || '';
-    this.currentPage = 1; // Reset to first page when filters change
-    this.loadCategories();
   }
 
   // Modal methods
@@ -556,28 +500,22 @@ export class AdminCategoriesComponent {
     this.showModal = true;
   }
 
-  openEditModal(category: any): void {
+  openEditModal(category: CategoryTableItem): void {
     this.editingCategory = category;
     this.categoryFormModel = {
       name: category.name || '',
       description: category.description || '',
       slug: category.slug || '',
       imageUrl: category.imageUrl || '',
-      sortOrder: category.sortOrder || 0,
-      isActive: category.isActive || false,
+      sortOrder: category.sortOrder ?? 0,
+      isActive: category.isActive ?? false,
       metaTitle: category.metaTitle || '',
       metaDescription: category.metaDescription || '',
       metaKeywords: category.metaKeywords || ''
     };
 
-    // Reset file upload properties but keep the existing image URL for display
     this.selectedFile = null;
-    if (category.imageUrl) {
-      this.filePreview = category.imageUrl; // Show existing image URL
-    } else {
-      this.filePreview = null;
-    }
-
+    this.filePreview = category.imageUrl || null;
     this.showModal = true;
   }
 
@@ -599,32 +537,36 @@ export class AdminCategoriesComponent {
       metaDescription: '',
       metaKeywords: ''
     };
-    // Reset file upload properties
     this.selectedFile = null;
     this.filePreview = null;
   }
 
   // File upload handling
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
     if (file) {
-      // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
       if (!allowedTypes.includes(file.type)) {
-        this.messageDialogService.error('Please select a valid image file (JPEG, PNG, GIF)', 'Invalid File Type');
+        this.messageDialogService.error(
+          this.languageService.getTranslation('Please select a valid image file (JPEG, PNG, GIF)'),
+          this.languageService.getTranslation('Invalid File Type')
+        );
         return;
       }
 
-      // Validate file size (e.g., 5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
-        this.messageDialogService.error('File size too large. Please select an image under 5MB.', 'File Too Large');
+        this.messageDialogService.error(
+          this.languageService.getTranslation('File size too large. Please select an image under 5MB.'),
+          this.languageService.getTranslation('File Too Large')
+        );
         return;
       }
 
       this.selectedFile = file;
 
-      // Create preview
       const reader = new FileReader();
       reader.onload = () => {
         this.filePreview = reader.result as string;
@@ -640,48 +582,48 @@ export class AdminCategoriesComponent {
 
   async uploadFile(): Promise<string | null> {
     if (!this.selectedFile) {
-      return this.categoryFormModel.imageUrl; // Return existing URL if no new file
+      return this.categoryFormModel.imageUrl;
     }
 
     this.isUploading = true;
     try {
-      // Upload the file using the file service
-      const response = await lastValueFrom(this.fileService.apiFileUploadImagePost('category', this.selectedFile));
+      const response = await lastValueFrom(
+        this.fileService.apiFileUploadImagePost('category', this.selectedFile)
+      );
       this.isUploading = false;
       return response?.data || null;
     } catch (error) {
       console.error('Error uploading file:', error);
       this.isUploading = false;
-      this.messageDialogService.error('Error uploading image. Please try again.', 'Upload Error');
+      this.messageDialogService.error(
+        this.languageService.getTranslation('Error uploading image. Please try again.'),
+        this.languageService.getTranslation('Upload Error')
+      );
       return null;
     }
   }
 
-  // Create category method
   async createCategory(): Promise<void> {
     if (!this.validateForm()) {
       return;
     }
 
     this.loading = true;
-    this.error = null;
 
-    // Upload the file if selected and get the URL
-    let imageUrl: string | null = null;
+    let imageUrl: string | null = this.categoryFormModel.imageUrl;
     if (this.selectedFile) {
       imageUrl = await this.uploadFile();
       if (imageUrl === null) {
         this.loading = false;
-        return; // Upload failed
+        return;
       }
     }
 
-    // Prepare the request body according to CreateCategoryDto
     const createDto = {
       name: this.categoryFormModel.name,
       description: this.categoryFormModel.description || null,
       slug: this.categoryFormModel.slug || null,
-      imageUrl: imageUrl || null, // Use uploaded image URL or null
+      imageUrl: imageUrl || null,
       sortOrder: this.categoryFormModel.sortOrder,
       isActive: this.categoryFormModel.isActive,
       metaTitle: this.categoryFormModel.metaTitle || null,
@@ -690,46 +632,44 @@ export class AdminCategoriesComponent {
     };
 
     this.categoryService.apiCategoryPost(createDto).subscribe({
-      next: (response) => {
-        console.log('Category created successfully', response);
+      next: () => {
+        this.messageDialogService.success(
+          this.languageService.getTranslation('Category created successfully!'),
+          this.languageService.getTranslation('Success')
+        );
         this.loading = false;
         this.closeModal();
-        this.loadCategories(); // Reload the list
+        this.loadCategories();
       },
       error: (error) => {
         console.error('Error creating category:', error);
         this.loading = false;
-        this.error = this.languageService.getTranslation('Error creating category. Please try again.');
-        this.messageDialogService.error('Error creating category: ' + (error?.error?.message || error?.message || 'Unknown error'), 'Error');
+        this.messageDialogService.error(
+          this.languageService.getTranslation('Error creating category. Please try again.'),
+          this.languageService.getTranslation('Error')
+        );
       }
     });
   }
 
-  // Update category method
   async updateCategory(): Promise<void> {
     if (!this.editingCategory?.id || !this.validateForm()) {
       return;
     }
 
     this.loading = true;
-    this.error = null;
 
-    // Determine the image URL to use
-    let imageUrl: string | null = null;
-
+    let imageUrl: string | null = this.categoryFormModel.imageUrl;
     if (this.selectedFile) {
-      // If a new file was selected, upload it
       imageUrl = await this.uploadFile();
       if (imageUrl === null) {
         this.loading = false;
-        return; // Upload failed
+        return;
       }
     } else {
-      // If no new file was selected, use the existing image URL from the category being edited
       imageUrl = this.editingCategory.imageUrl || null;
     }
 
-    // Prepare the request body according to UpdateCategoryDto
     const updateDto = {
       name: this.categoryFormModel.name,
       description: this.categoryFormModel.description || null,
@@ -743,24 +683,32 @@ export class AdminCategoriesComponent {
     };
 
     this.categoryService.apiCategoryIdPut(this.editingCategory.id, updateDto).subscribe({
-      next: (response) => {
+      next: () => {
+        this.messageDialogService.success(
+          this.languageService.getTranslation('Category updated successfully!'),
+          this.languageService.getTranslation('Success')
+        );
         this.loading = false;
         this.closeModal();
-        this.loadCategories(); // Reload the list
+        this.loadCategories();
       },
       error: (error) => {
         console.error('Error updating category:', error);
         this.loading = false;
-        this.error = this.languageService.getTranslation('Error updating category. Please try again.');
-        this.messageDialogService.error('Error updating category: ' + (error?.error?.message || error?.message || 'Unknown error'), 'Error');
+        this.messageDialogService.error(
+          this.languageService.getTranslation('Error updating category. Please try again.'),
+          this.languageService.getTranslation('Error')
+        );
       }
     });
   }
 
-  // Validate form method
   validateForm(): boolean {
     if (!this.categoryFormModel.name.trim()) {
-      this.messageDialogService.error('Category name is required', 'Validation Error');
+      this.messageDialogService.error(
+        this.languageService.getTranslation('Category name is required'),
+        this.languageService.getTranslation('Validation Error')
+      );
       return false;
     }
     return true;
