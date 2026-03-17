@@ -1,6 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CategoryService } from '../../../../public-api/api/category.service';
 import { BrandService } from '../../../../public-api/api/brand.service';
@@ -11,6 +10,16 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { LanguageService } from '../../../services/language.service';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { ProductDto } from '../../../../public-api';
+
+interface CategoryItem {
+  id: number;
+  name: string;
+}
+
+interface BrandItem {
+  id: number;
+  name: string;
+}
 
 @Component({
   selector: 'app-admin-products',
@@ -132,8 +141,8 @@ import { ProductDto } from '../../../../public-api';
         [filterConfig]="filterConfig"
         [showActions]="true"
         [rowActions]="[
-          { name: 'edit', title: 'Edit', color: 'indigo' },
-          { name: 'toggleActive', title: 'Toggle Active', color: 'blue' },
+          { name: 'edit', title: 'Edit' | translate, color: 'indigo' },
+          { name: 'toggleActive', title: 'Toggle Active' | translate, color: 'blue' },
         ]"
         (sortChange)="onSortChange($event)"
         (filterChange)="onFilterChange($event)"
@@ -162,7 +171,14 @@ import { ProductDto } from '../../../../public-api';
   `]
 })
 export class AdminProductsComponent implements OnInit {
-  languageService = inject(LanguageService);
+  private languageService = inject(LanguageService);
+  private messageDialogService = inject(MessageDialogService);
+  private productService = inject(ProductService);
+  private categoryService = inject(CategoryService);
+  private brandService = inject(BrandService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+
   products: ProductDto[] = [];
   loading = false;
   error: string | null = null;
@@ -188,8 +204,8 @@ export class AdminProductsComponent implements OnInit {
   };
 
   // Filter properties for UI
-  categories: any[] = [];
-  brands: any[] = [];
+  categories: CategoryItem[] = [];
+  brands: BrandItem[] = [];
 
   // Confirm dialog properties
   showConfirmDialog = false;
@@ -199,14 +215,6 @@ export class AdminProductsComponent implements OnInit {
   confirmDialogCancelText = 'Cancel';
   productToDelete: number | null = null;
   productToToggle: { id: number; name: string; currentStatus: boolean } | null = null;
-
-  constructor(
-    private productService: ProductService,
-    private categoryService: CategoryService,
-    private brandService: BrandService,
-    private messageDialogService: MessageDialogService,
-    private router: Router
-  ) { }
 
   ngOnInit(): void {
     // Initialize table columns with translations
@@ -261,24 +269,27 @@ export class AdminProductsComponent implements OnInit {
       next: (result) => {
         this.products = result.data?.items ?? [];
         this.paginationConfig.totalItems = result.data?.totalCount ?? 0;
-        this.paginationConfig.totalPages = result.data?.totalPages || Math.ceil(result.data?.totalCount ?? 0 / this.paginationConfig.pageSize);
+        this.paginationConfig.totalPages = result.data?.totalPages || Math.ceil((result.data?.totalCount ?? 0) / this.paginationConfig.pageSize);
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading products:', error);
         this.error = this.languageService.getTranslation('Failed to load products. Please try again.');
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
   private loadCategories(): void {
     this.categoryService.apiCategoryGet().subscribe({
-      next: (response: any) => {
-        this.categories = (response?.data || []).map((cat: any) => ({
-          id: cat.id,
-          name: cat.name
+      next: (response) => {
+        this.categories = (response?.data || []).map((cat) => ({
+          id: cat.id || 0,
+          name: cat.name || ''
         }));
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading categories:', error);
@@ -288,26 +299,17 @@ export class AdminProductsComponent implements OnInit {
 
   private loadBrands(): void {
     this.brandService.apiBrandGet().subscribe({
-      next: (response: any) => {
-        this.brands = (response?.data || []).map((brand: any) => ({
-          id: brand.id,
-          name: brand.name
+      next: (response) => {
+        this.brands = (response?.data || []).map((brand) => ({
+          id: brand.id || 0,
+          name: brand.name || ''
         }));
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading brands:', error);
       }
     });
-  }
-
-  private getStatusFilter(): boolean {
-    const statusFilter = this.filterConfig.filters['status'];
-    if (statusFilter === 'active') {
-      return true;
-    } else if (statusFilter === 'inactive') {
-      return false;
-    }
-    return true; // All statuses
   }
 
   // Event handlers for CommonTable
@@ -317,13 +319,11 @@ export class AdminProductsComponent implements OnInit {
   }
 
   applyFilters(): void {
-    this.paginationConfig.currentPage = 1; // Reset to first page when filtering
+    this.paginationConfig.currentPage = 1;
     this.loadProducts();
   }
 
   onFilterChange(filterConfig: FilterConfig): void {
-    // We're handling filters in the UI directly, so this is just for compatibility
-    // with the CommonTable component
     this.filterConfig = filterConfig;
     this.loadProducts();
   }
@@ -333,28 +333,40 @@ export class AdminProductsComponent implements OnInit {
     this.loadProducts();
   }
 
-  onAction(event: { name: string; item: any; index: number }): void {
+  onAction(event: { name: string; item: ProductDto; index: number }): void {
     if (event.name === 'edit') {
-      // Navigate to edit page for the selected product
       this.router.navigate(['/admin/products/edit', event.item.id]);
     } else if (event.name === 'toggleActive') {
-      // Use confirm dialog for toggle active action
       this.openToggleConfirmDialog(event.item);
     } else if (event.name === 'delete') {
-      // Use confirm dialog for delete action
       this.openDeleteConfirmDialog(event.item);
     }
   }
 
-  private toggleProductActive(productId: number, isActive: boolean, productName: string): void {
+  private toggleProductActive(productId: number | undefined, isActive: boolean, productName: string): void {
+    if (!productId) {
+      this.messageDialogService.error(
+        this.languageService.getTranslation('Invalid product ID'),
+        this.languageService.getTranslation('Error')
+      );
+      return;
+    }
+
     this.loading = true;
 
-    // First, get the current product to update
     this.productService.apiProductIdGet(productId).subscribe({
-      next: (response: any) => {
+      next: (response) => {
         const product = response?.data;
 
-        // Prepare the update DTO with the new active status
+        if (!product) {
+          this.messageDialogService.error(
+            this.languageService.getTranslation('Product not found'),
+            this.languageService.getTranslation('Error')
+          );
+          this.loading = false;
+          return;
+        }
+
         const updateDto = {
           name: product.name,
           description: product.description,
@@ -364,37 +376,44 @@ export class AdminProductsComponent implements OnInit {
           sku: product.sku,
           barcode: product.barcode || '',
           stockQuantity: product.stockQuantity,
-          isActive: isActive, // Toggle the active status
+          isActive: isActive,
           isFeatured: product.isFeatured,
           isNew: product.isNew,
           brandId: product.brandId ? Number(product.brandId) : undefined,
           categoryId: product.categoryId ? Number(product.categoryId) : undefined,
-          metaTitle: product.metaTitle || '',
-          metaDescription: product.metaDescription || '',
-          metaKeywords: product.metaKeywords || '',
-          tagIds: product.tagIds || [],
-          specificationValues: product.specificationValues || {}
+          metaTitle: '',
+          metaDescription: '',
+          metaKeywords: '',
+          tagIds: [],
+          specificationValues: {}
         };
 
-        // Update the product with the new active status
         this.productService.apiProductIdPut(productId, updateDto).subscribe({
           next: () => {
             const action = isActive ? this.languageService.getTranslation('activated') : this.languageService.getTranslation('deactivated');
-            this.messageDialogService.success(`${this.languageService.getTranslation('Product')}"${productName}" ${this.languageService.getTranslation('has been')} ${action} ${this.languageService.getTranslation('successfully')}!`, this.languageService.getTranslation('Success'));
-            // Reload products after toggling active status
+            this.messageDialogService.success(
+              `${this.languageService.getTranslation('Product')} "${productName}" ${this.languageService.getTranslation('has been')} ${action} ${this.languageService.getTranslation('successfully')}!`,
+              this.languageService.getTranslation('Success')
+            );
             this.loadProducts();
             this.loading = false;
           },
           error: (error) => {
             console.error('Error toggling product active status:', error);
-            this.messageDialogService.error(this.languageService.getTranslation('Failed to update product status. Please try again.'), this.languageService.getTranslation('Error'));
+            this.messageDialogService.error(
+              this.languageService.getTranslation('Failed to update product status. Please try again.'),
+              this.languageService.getTranslation('Error')
+            );
             this.loading = false;
           }
         });
       },
       error: (error) => {
         console.error('Error fetching product for update:', error);
-        this.messageDialogService.error(this.languageService.getTranslation('Failed to fetch product details. Please try again.'), this.languageService.getTranslation('Error'));
+        this.messageDialogService.error(
+          this.languageService.getTranslation('Failed to fetch product details. Please try again.'),
+          this.languageService.getTranslation('Error')
+        );
         this.loading = false;
       }
     });
@@ -404,20 +423,24 @@ export class AdminProductsComponent implements OnInit {
     this.loading = true;
     this.productService.apiProductIdDelete(productId).subscribe({
       next: () => {
-        this.messageDialogService.success(this.languageService.getTranslation('Product deleted successfully!'), this.languageService.getTranslation('Success'));
-        // Reload products after deletion
+        this.messageDialogService.success(
+          this.languageService.getTranslation('Product deleted successfully!'),
+          this.languageService.getTranslation('Success')
+        );
         this.loadProducts();
         this.loading = false;
       },
       error: (error) => {
         console.error('Error deleting product:', error);
-        this.messageDialogService.error(this.languageService.getTranslation('Failed to delete product. Please try again.'), this.languageService.getTranslation('Error'));
+        this.messageDialogService.error(
+          this.languageService.getTranslation('Failed to delete product. Please try again.'),
+          this.languageService.getTranslation('Error')
+        );
         this.loading = false;
       }
     });
   }
 
-  // Methods to handle confirm dialog
   private openDeleteConfirmDialog(product: ProductDto): void {
     this.productToDelete = product.id || 0;
     this.confirmDialogTitle = this.languageService.getTranslation('Delete Product');
@@ -435,7 +458,7 @@ export class AdminProductsComponent implements OnInit {
     this.productToToggle = {
       id: product.id || 0,
       name: product.name,
-      currentStatus: product.isActive || false
+      currentStatus: product.isActive ?? false
     };
 
     this.confirmDialogTitle = this.languageService.getTranslation('Toggle Product Status');

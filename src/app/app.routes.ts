@@ -36,6 +36,7 @@ import { AdminArticleAuthorComponent } from './pages/admin/admin-article-author/
 import { ArticleDetailComponent } from './pages/article-detail/article-detail.component';
 import { AdminSellersComponent } from './pages/admin/admin-sellers/admin-sellers.component';
 import { MyShopInfoComponent } from './pages/my-shop-info/my-shop-info.component';
+import { AdminFileProcessingComponent } from './pages/admin/admin-file-processing/admin-file-processing.component';
 
 export const routes: Routes = [
   {
@@ -85,6 +86,7 @@ export const routes: Routes = [
       { path: 'articles', component: AdminArticleManagerComponent },
       { path: 'article-categories', component: AdminArticleCategoryComponent },
       { path: 'article-authors', component: AdminArticleAuthorComponent },
+      { path: 'file-processing', component: AdminFileProcessingComponent },
       { path: '**', redirectTo: 'dashboard' }
     ]
   },

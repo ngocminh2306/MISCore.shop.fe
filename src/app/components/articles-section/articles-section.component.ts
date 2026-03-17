@@ -1,9 +1,10 @@
-import { Component, OnInit, Output, EventEmitter, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Output, EventEmitter, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ArticleService } from '../../../public-api/api/article.service';
+import { ArticleDto } from '../../../public-api/model/articleDto';
 
-export interface Article {
-  id: number | string;
+export interface ArticleItem {
+  id: number;
   title: string;
   excerpt: string;
   category: string;
@@ -32,6 +33,10 @@ export interface Article {
         } @else if (error) {
           <div class="text-center py-8 text-red-600">
             <p>Error loading articles: {{ error }}</p>
+          </div>
+        } @else if (articles.length === 0) {
+          <div class="text-center py-8 text-gray-500">
+            <p>Không có bài viết nào</p>
           </div>
         } @else {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -82,17 +87,17 @@ export interface Article {
     }
   `]
 })
-export class ArticlesSectionComponent implements OnInit {
-  @Output() articleSelected = new EventEmitter<Article>();
+export class ArticlesSectionComponent {
+  @Output() articleSelected = new EventEmitter<ArticleItem>();
 
-  articles: Article[] = [];
+  articles: ArticleItem[] = [];
   loading = false;
   error: string | null = null;
+
   private router = inject(Router);
   private articleService = inject(ArticleService);
-  private cdr = inject(ChangeDetectorRef);
 
-  ngOnInit(): void {
+  constructor() {
     this.loadArticles();
   }
 
@@ -102,44 +107,42 @@ export class ArticlesSectionComponent implements OnInit {
 
     // Get featured articles from the API
     this.articleService.apiArticleFeaturedGet(6).subscribe({
-      next: (response: any) => {
-        // Extract the articles data from the API response
+      next: (response) => {
         const articlesData = response?.data || response;
 
         if (Array.isArray(articlesData)) {
-          this.articles = articlesData.map((apiArticle: any) => ({
-            id: apiArticle.id,
-            title: apiArticle.title || 'Untitled Article',
-            excerpt: apiArticle.excerpt || apiArticle.shortDescription || 'No excerpt available',
-            category: this.getPrimaryCategory(apiArticle),
-            author: apiArticle.author || apiArticle.createdBy || 'Anonymous',
-            publishedDate: new Date(apiArticle.createdAt || apiArticle.publishedAt || Date.now()),
-            imageUrl: apiArticle.mainImageUrl || apiArticle.image || 'https://placehold.co/600x400/e5e7eb/6b7280?text=No+Image'
-          }));
+          this.articles = articlesData.map((apiArticle: ArticleDto) => this.mapToArticleItem(apiArticle));
         } else {
           console.warn('API response is not an array:', articlesData);
           this.articles = [];
         }
 
         this.loading = false;
-        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading articles:', error);
         this.error = 'Failed to load articles';
         this.loading = false;
-        this.cdr.markForCheck();
       }
     });
   }
 
-  private getPrimaryCategory(apiArticle: any): string {
+  private mapToArticleItem(apiArticle: ArticleDto): ArticleItem {
+    return {
+      id: apiArticle.id || 0,
+      title: apiArticle.title || 'Untitled Article',
+      excerpt: apiArticle.summary || apiArticle.content?.substring(0, 150) || 'No excerpt available',
+      category: this.getPrimaryCategory(apiArticle),
+      author: apiArticle.authorName || 'Anonymous',
+      publishedDate: new Date(apiArticle.publishedAt || apiArticle.createdAt || Date.now()),
+      imageUrl: apiArticle.imageUrl || 'https://placehold.co/600x400/e5e7eb/6b7280?text=No+Image'
+    };
+  }
+
+  private getPrimaryCategory(apiArticle: ArticleDto): string {
     // Try different possible fields for category
     if (apiArticle.articleCategories && apiArticle.articleCategories.length > 0) {
-      return apiArticle.articleCategories[0].name || apiArticle.articleCategories[0].title || 'Uncategorized';
-    }
-    if (apiArticle.category) {
-      return apiArticle.category;
+      return apiArticle.articleCategories[0].name || apiArticle.articleCategories[0].slug || 'Uncategorized';
     }
     if (apiArticle.articleType) {
       return apiArticle.articleType;
@@ -147,7 +150,7 @@ export class ArticlesSectionComponent implements OnInit {
     return 'Uncategorized';
   }
 
-  onArticleClick(article: Article): void {
+  onArticleClick(article: ArticleItem): void {
     this.articleSelected.emit(article);
     // Navigate to article details page
     this.router.navigate(['/article', article.id]);
@@ -161,8 +164,10 @@ export class ArticlesSectionComponent implements OnInit {
     });
   }
 
-  onImageError(event: any): void {
-    // Set a fallback image if the primary image fails to load
-    event.target.src = 'https://placehold.co/600x400/e5e7eb/6b7280?text=No+Image';
+  onImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'https://placehold.co/600x400/e5e7eb/6b7280?text=No+Image';
+    }
   }
 }

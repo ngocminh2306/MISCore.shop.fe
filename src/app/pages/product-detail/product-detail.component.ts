@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { CartService } from '../../services/cart.service';
@@ -61,13 +61,14 @@ import { ProductDto } from '../../../public-api';
               <!-- Thumbnails -->
               <div class="flex mt-4 space-x-2 overflow-x-auto py-2">
                 @for (thumb of (product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls : (product.imageUrls ? [product.mainImageUrl] : [])); track thumb) {
-                  <img
-                    [src]="thumb"
-                    [alt]="product.name"
-                    class="w-16 h-16 object-cover border rounded cursor-pointer flex-shrink-0"
+                  <button type="button"
+                    [attr.aria-label]="'Select image of ' + product.name"
+                    class="w-16 h-16 object-cover border rounded cursor-pointer flex-shrink-0 p-0"
                     [class.border-orange-500]="product.mainImageUrl === thumb"
                     (click)="setImage(thumb || '')"
                   >
+                    <img [src]="thumb" [alt]="product.name" class="w-full h-full object-cover" />
+                  </button>
                 }
               </div>
             </div>
@@ -118,7 +119,7 @@ import { ProductDto } from '../../../public-api';
               <!-- Chọn số lượng -->
               <div class="mb-4">
                 <div class="flex items-center justify-between mb-2">
-                  <label class="font-medium text-gray-900">Số lượng:</label>
+                  <label for="count" class="font-medium text-gray-900">Số lượng:</label>
                   <span class="text-sm text-gray-600">Còn {{ product.stockQuantity }} sản phẩm</span>
                 </div>
                 <div class="flex items-center border border-gray-300 rounded-lg">
@@ -187,6 +188,7 @@ export class ProductDetailComponent implements OnInit {
   private productService = inject(PublicProductService);
   private messageDialogService = inject(MessageDialogService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   product: ProductDto | null = null;
   quantity = 1;
@@ -204,10 +206,8 @@ export class ProductDetailComponent implements OnInit {
 
     this.productService.apiProductIdGet(id).subscribe({
       next: (response) => {
-        // The API response structure might vary, adjust based on actual response
-        const productData: ProductDto = response?.data || {} as any;
+        const productData: ProductDto = response?.data || {} as ProductDto;
 
-        // Ensure the product data matches our Product interface
         // Create a properly typed product object from API response
         this.product = {
           id: productData.id || 0,
@@ -219,13 +219,13 @@ export class ProductDetailComponent implements OnInit {
           sku: productData.sku || '',
           barcode: productData.barcode || '',
           stockQuantity: productData.stockQuantity || 0,
-          isInStock: productData.isInStock || false,
-          isActive: productData.isActive || false,
-          isFeatured: productData.isFeatured || false,
-          isNew: productData.isNew || false,
-          averageRating: productData.averageRating || 0,
-          ratingCount: productData.ratingCount || 0,
-          viewCount: productData.viewCount || 0,
+          isInStock: productData.isInStock ?? false,
+          isActive: productData.isActive ?? false,
+          isFeatured: productData.isFeatured ?? false,
+          isNew: productData.isNew ?? false,
+          averageRating: productData.averageRating ?? 0,
+          ratingCount: productData.ratingCount ?? 0,
+          viewCount: productData.viewCount ?? 0,
           brandId: productData.brandId,
           brandName: productData.brandName || '',
           categoryId: productData.categoryId,
@@ -239,11 +239,13 @@ export class ProductDetailComponent implements OnInit {
         };
 
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading product:', error);
         this.error = 'Failed to load product details. Please try again.';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -252,6 +254,7 @@ export class ProductDetailComponent implements OnInit {
   setImage(imageUrl: string | undefined): void {
     if (this.product && imageUrl) {
       this.product.mainImageUrl = imageUrl;
+      this.cdr.detectChanges();
     }
   }
 
