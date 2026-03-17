@@ -11,11 +11,11 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'admin/products/edit/:id',
-    renderMode: RenderMode.Server
+    renderMode: RenderMode.Client
   },
   {
     path: 'admin/orders/:id',
-    renderMode: RenderMode.Server
+    renderMode: RenderMode.Client
   },
   {
     path: 'article/:id',
@@ -93,6 +93,6 @@ export const serverRoutes: ServerRoute[] = [
   // Catch all other routes that should use Server rendering
   {
     path: '**',
-    renderMode: RenderMode.Server
+    renderMode: RenderMode.Client
   }
 ];

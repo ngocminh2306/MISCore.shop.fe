@@ -23,7 +23,7 @@ interface Category {
   imports: [RouterLink, BannerSliderComponent, ProductCardComponent, CategoryGridComponent, ArticlesSectionComponent],
   template: `
     <!-- Banner Slider -->
-    <misc-banner-slider [autoPlay]="true" [interval]="5000"></misc-banner-slider>
+    <app-banner-slider [autoPlay]="true" [interval]="5000"></app-banner-slider>
 
     <!-- Featured Products -->
     <section class="py-16 bg-gray-50">
@@ -139,6 +139,7 @@ export class HomeComponent implements OnInit {
           imageUrl: category.imageUrl || 'https://placehold.co/300x300/4f46e5/ffffff?text=' + encodeURIComponent(category.name),
           productCount: category.activeProductsCount || 0
         } as Category));
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading categories:', error);

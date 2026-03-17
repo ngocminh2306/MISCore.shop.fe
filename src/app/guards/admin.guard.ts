@@ -18,21 +18,17 @@ export class AdminGuard implements CanActivate {
   }
 
   canActivate(): Observable<boolean> {
-    console.log('AdminGuard checking user:', this.authService.getUser());
     return this.currentUser$.pipe(
       map((user: User | null) => {
         // Check if user is authenticated and has admin role
         if (user && user.roles.includes('Admin')) {
           return true;
         } else {
-          // Redirect to home if not admin
-          this.router.navigate(['/']);
           return false;
         }
       }),
       catchError(() => {
         // If there's an error, redirect to home
-        this.router.navigate(['/']);
         return of(false);
       })
     );

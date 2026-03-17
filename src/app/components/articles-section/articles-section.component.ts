@@ -1,7 +1,6 @@
-import { Component, OnInit, Output, EventEmitter, inject } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, inject, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ArticleService } from '../../../public-api/api/article.service';
-import { ArticleDto } from '../../../public-api/model/articleDto';
 
 export interface Article {
   id: number | string;
@@ -91,6 +90,7 @@ export class ArticlesSectionComponent implements OnInit {
   error: string | null = null;
   private router = inject(Router);
   private articleService = inject(ArticleService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     this.loadArticles();
@@ -122,11 +122,13 @@ export class ArticlesSectionComponent implements OnInit {
         }
 
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading articles:', error);
         this.error = 'Failed to load articles';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }

@@ -16,7 +16,7 @@ import { MessageDialogService } from '../../../services/message-dialog.service';
   standalone: true,
   imports: [FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent, TranslatePipe],
   template: `
-    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">{{ 'Admin Categories' | translate }}</h1>
         <div class="mt-4 flex justify-between items-center">
@@ -58,196 +58,213 @@ import { MessageDialogService } from '../../../services/message-dialog.service';
       </misc-common-table>
 
       <!-- Create/Edit Category Modal -->
-      <div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-md mx-4 max-h-[90vh] flex flex-col">
-          <div class="flex justify-between items-center px-6 pt-6 pb-4">
-            <h3 class="text-lg font-semibold">
-              {{ editingCategory ? ('Edit Category' | translate) : ('Create Category' | translate) }}
-            </h3>
-            <button (click)="closeModal()" class="text-gray-500 hover:text-gray-700">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+       @if(showModal) {
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-lg w-full max-w-md mx-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center px-6 pt-6 pb-4">
+              <h3 class="text-lg font-semibold">
+                {{ editingCategory ? ('Edit Category' | translate) : ('Create Category' | translate) }}
+              </h3>
+              <button (click)="closeModal()" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form (ngSubmit)="editingCategory ? updateCategory() : createCategory()" #categoryForm="ngForm" class="flex flex-col flex-grow overflow-hidden">
+              <div class="overflow-y-auto flex-grow px-6 pb-4">
+                <div class="space-y-4">
+                <div>
+                  <label for="name" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Name' | translate }} *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="categoryFormModel.name"
+                    name="name"
+                    id="name"
+                    required
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    [placeholder]="'Category name' | translate"
+                  >
+                </div>
+
+                <div>
+                  <label for="description" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Description' | translate }}</label>
+                  <textarea
+                    [(ngModel)]="categoryFormModel.description"
+                    name="description"
+                    id="description"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    [placeholder]="'Category description' | translate"
+                    rows="3"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Slug' | translate }}</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="categoryFormModel.slug"
+                    name="slug"
+                    id="slug"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    [placeholder]="'Category slug' | translate"
+                  >
+                </div>
+
+                <div>
+                  <label for="file-upload" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Category Image' | translate }}</label>
+                  <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-md">
+                    <div class="space-y-1 text-center">
+                      <div class="flex text-sm text-gray-600 justify-center">
+                        <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                          <span>{{ 'Upload a file' | translate }}</span>
+                          <input
+                            id="file-upload"
+                            name="file-upload"
+                            type="file"
+                            accept="image/*"
+                            class="sr-only"
+                            (change)="onFileSelected($event)"
+                          />
+                        </label>
+                        <p class="pl-1">{{ 'or drag and drop' | translate }}</p>
+                      </div>
+                      <p class="text-xs text-gray-500">{{ 'PNG, JPG, GIF up to 5MB' | translate }}</p>
+                    </div>
+                  </div>
+
+                  <!-- File preview -->
+                   @if(filePreview) {
+                    @if(filePreview) {
+                      <div class="mt-3">
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center">
+                            @if(filePreview && selectedFile) {
+                              <img
+                                [src]="filePreview"
+                                alt="Preview"
+                                class="w-16 h-16 object-cover rounded-md border"
+                              >
+                            } @else {
+                              <img
+                                [src]="filePreview"
+                                alt="Current Image"
+                                class="w-16 h-16 object-cover rounded-md border"
+                              >
+                            }
+                            @if(selectedFile) {
+                              <span class="ml-3 text-sm text-gray-600 truncate max-w-xs">
+                                {{ selectedFile.name }}
+                              </span>
+                            }
+                          </div>
+                          <button
+                            type="button"
+                            (click)="removeFile()"
+                            class="ml-3 inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-red-500 hover:text-red-700 focus:outline-none"
+                          >
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        <!-- Show uploading status -->
+                         @if(isUploading) {
+                          <div class="mt-2">
+                            <div class="flex items-center">
+                              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+                              <span class="ml-2 text-sm text-gray-600">{{ 'Uploading...' | translate }}</span>
+                            </div>
+                          </div>
+                         }
+                      </div>
+                    }
+                   }
+                </div>
+
+                <div>
+                  <label for="sortOrder" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Sort Order' | translate }}</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="categoryFormModel.sortOrder"
+                    name="sortOrder"
+                    id="sortOrder"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    [placeholder]="'Sort order' | translate"
+                  >
+                </div>
+
+                <div>
+                  <label for="metaTitle" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Meta Title' | translate }}</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="categoryFormModel.metaTitle"
+                    name="metaTitle"
+                    id="metaTitle"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    [placeholder]="'Meta title' | translate"
+                  >
+                </div>
+
+                <div>
+                  <label for="metaDescription" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Meta Description' | translate }}</label>
+                  <textarea
+                    [(ngModel)]="categoryFormModel.metaDescription"
+                    name="metaDescription"
+                    id="metaDescription"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    [placeholder]="'Meta description' | translate"
+                    rows="2"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label for="metaKeywords" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Meta Keywords' | translate }}</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="categoryFormModel.metaKeywords"
+                    name="metaKeywords"
+                    id="metaKeywords"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    [placeholder]="'Meta keywords' | translate"
+                  >
+                </div>
+
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="categoryFormModel.isActive"
+                    name="isActive"
+                    id="isActive"
+                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  >
+                  <label for="isActive" class="ml-2 block text-sm text-gray-700">{{ 'Active' | translate }}</label>
+                </div>
+              </div>
+
+              <div class="mt-6 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  (click)="closeModal()"
+                  class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  {{ 'Cancel' | translate }}
+                </button>
+                <button
+                  type="submit"
+                  [disabled]="!categoryForm.form.valid"
+                  class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {{ editingCategory ? ('Update Category' | translate) : ('Create Category' | translate) }}
+                </button>
+                </div>
+              </div>
+            </form>
           </div>
-
-          <form (ngSubmit)="editingCategory ? updateCategory() : createCategory()" #categoryForm="ngForm" class="flex flex-col flex-grow overflow-hidden">
-            <div class="overflow-y-auto flex-grow px-6 pb-4">
-              <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Name' | translate }} *</label>
-                <input
-                  type="text"
-                  [(ngModel)]="categoryFormModel.name"
-                  name="name"
-                  required
-                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  [placeholder]="'Category name' | translate"
-                >
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Description' | translate }}</label>
-                <textarea
-                  [(ngModel)]="categoryFormModel.description"
-                  name="description"
-                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  [placeholder]="'Category description' | translate"
-                  rows="3"
-                ></textarea>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Slug' | translate }}</label>
-                <input
-                  type="text"
-                  [(ngModel)]="categoryFormModel.slug"
-                  name="slug"
-                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  [placeholder]="'Category slug' | translate"
-                >
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Category Image' | translate }}</label>
-                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-md">
-                  <div class="space-y-1 text-center">
-                    <div class="flex text-sm text-gray-600 justify-center">
-                      <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                        <span>{{ 'Upload a file' | translate }}</span>
-                        <input
-                          id="file-upload"
-                          name="file-upload"
-                          type="file"
-                          accept="image/*"
-                          class="sr-only"
-                          (change)="onFileSelected($event)"
-                        />
-                      </label>
-                      <p class="pl-1">{{ 'or drag and drop' | translate }}</p>
-                    </div>
-                    <p class="text-xs text-gray-500">{{ 'PNG, JPG, GIF up to 5MB' | translate }}</p>
-                  </div>
-                </div>
-
-                <!-- File preview -->
-                <div *ngIf="filePreview" class="mt-3">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                      <img
-                        [src]="filePreview"
-                        alt="Preview"
-                        class="w-16 h-16 object-cover rounded-md border"
-                        *ngIf="filePreview && selectedFile; else urlPreview"
-                      >
-                      <ng-template #urlPreview>
-                        <img
-                          [src]="filePreview"
-                          alt="Current Image"
-                          class="w-16 h-16 object-cover rounded-md border"
-                        >
-                      </ng-template>
-                      <span class="ml-3 text-sm text-gray-600 truncate max-w-xs" *ngIf="selectedFile">
-                        {{ selectedFile.name }}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      (click)="removeFile()"
-                      class="ml-3 inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-red-500 hover:text-red-700 focus:outline-none"
-                    >
-                      <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Show uploading status -->
-                  <div *ngIf="isUploading" class="mt-2">
-                    <div class="flex items-center">
-                      <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
-                      <span class="ml-2 text-sm text-gray-600">{{ 'Uploading...' | translate }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Sort Order' | translate }}</label>
-                <input
-                  type="number"
-                  [(ngModel)]="categoryFormModel.sortOrder"
-                  name="sortOrder"
-                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  [placeholder]="'Sort order' | translate"
-                >
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Meta Title' | translate }}</label>
-                <input
-                  type="text"
-                  [(ngModel)]="categoryFormModel.metaTitle"
-                  name="metaTitle"
-                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  [placeholder]="'Meta title' | translate"
-                >
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Meta Description' | translate }}</label>
-                <textarea
-                  [(ngModel)]="categoryFormModel.metaDescription"
-                  name="metaDescription"
-                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  [placeholder]="'Meta description' | translate"
-                  rows="2"
-                ></textarea>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Meta Keywords' | translate }}</label>
-                <input
-                  type="text"
-                  [(ngModel)]="categoryFormModel.metaKeywords"
-                  name="metaKeywords"
-                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  [placeholder]="'Meta keywords' | translate"
-                >
-              </div>
-
-              <div class="flex items-center">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="categoryFormModel.isActive"
-                  name="isActive"
-                  id="isActive"
-                  class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                >
-                <label for="isActive" class="ml-2 block text-sm text-gray-700">{{ 'Active' | translate }}</label>
-              </div>
-            </div>
-
-            <div class="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                (click)="closeModal()"
-                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                {{ 'Cancel' | translate }}
-              </button>
-              <button
-                type="submit"
-                [disabled]="!categoryForm.form.valid"
-                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {{ editingCategory ? ('Update Category' | translate) : ('Create Category' | translate) }}
-              </button>
-              </div>
-            </div>
-          </form>
         </div>
-      </div>
+       }
 
       <!-- Confirm Dialog -->
       <misc-confirm-dialog
@@ -342,11 +359,8 @@ export class AdminCategoriesComponent {
 
   private languageService = inject(LanguageService);
   private messageDialogService = inject(MessageDialogService);
-
-  constructor(
-    private categoryService: CategoryService,
-    private fileService: FileService
-  ) { }
+  private categoryService = inject(CategoryService);
+  private fileService = inject(FileService);
 
   ngOnInit(): void {
     this.loadCategories();

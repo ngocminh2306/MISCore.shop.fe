@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnDestroy, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BannerService as AppBannerService } from '../../services/banner.service';
@@ -17,7 +17,7 @@ export interface Banner {
 }
 
 @Component({
-  selector: 'misc-banner-slider',
+  selector: 'app-banner-slider',
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
@@ -138,8 +138,8 @@ export interface Banner {
 })
 export class BannerSliderComponent implements OnInit, OnDestroy {
   @Input() banners: Banner[] = [];
-  @Input() autoPlay: boolean = true;
-  @Input() interval: number = 5000; // 5 seconds
+  @Input() autoPlay = true;
+  @Input() interval = 5000; // 5 seconds
 
   currentIndex = 0;
   loading = false;
@@ -147,7 +147,7 @@ export class BannerSliderComponent implements OnInit, OnDestroy {
   private intervalId: any;
   private platformId = inject(PLATFORM_ID);
   private bannerService = inject(AppBannerService);
-
+  private cdr = inject(ChangeDetectorRef);
   ngOnInit(): void {
     // Load banners from API if no banners are provided via input
     if (this.banners.length === 0) {
@@ -171,11 +171,13 @@ export class BannerSliderComponent implements OnInit, OnDestroy {
         this.banners = banners;
         this.loading = false;
         this.startSliderIfNeeded();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Error loading banners:', err);
         this.error = 'Failed to load banners';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -199,7 +201,7 @@ export class BannerSliderComponent implements OnInit, OnDestroy {
   }
 
   startSlider(): void {
-    if(isPlatformBrowser(this.platformId) && !this.intervalId) {
+    if (isPlatformBrowser(this.platformId) && !this.intervalId) {
       this.intervalId = setInterval(() => {
         this.nextSlide();
       }, this.interval);
