@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { ProductService as PublicProductService } from '../../../public-api/api/product.service';
@@ -91,10 +91,11 @@ export class HomeComponent implements OnInit {
   private productService = inject(PublicProductService);
   private categoryService = inject(CategoryService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   featuredProducts: ProductDto[] = [];
   newProducts: ProductDto[] = [];
-  categories: any[] = []; // Array to hold category objects with name, image, and product count
+  categories: Category[] = []; // Array to hold category objects with name, image, and product count
 
   ngOnInit(): void {
     // Load featured products using the real service
@@ -103,6 +104,7 @@ export class HomeComponent implements OnInit {
         this.featuredProducts = response?.data || [];
         // Update categories after loading products
         this.updateCategories();
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading featured products', error);
@@ -114,6 +116,7 @@ export class HomeComponent implements OnInit {
     this.productService.apiProductNewGet(8).subscribe({
       next: (response) => {
         this.newProducts = response?.data || [];
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading new products', error);
@@ -127,15 +130,15 @@ export class HomeComponent implements OnInit {
 
   private loadCategories(): void {
     this.categoryService.apiCategoryGet().subscribe({
-      next: (response: any) => {
+      next: (response) => {
         // Transform API response to match our requirements
-        this.categories = (response?.data || []).map((category: any) => ({
+        this.categories = (response?.data || []).map((category) => ({
           id: category.id,
           name: category.name,
           description: category.description,
           imageUrl: category.imageUrl || 'https://placehold.co/300x300/4f46e5/ffffff?text=' + encodeURIComponent(category.name),
-          productCount: category.productCount || 0
-        }));
+          productCount: category.activeProductsCount || 0
+        } as Category));
       },
       error: (error) => {
         console.error('Error loading categories:', error);
@@ -181,6 +184,7 @@ export class HomeComponent implements OnInit {
     this.cartService.addToCart(product);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onImageError(event: any): void {
     // Set a fallback image if the primary image fails to load
     event.target.src = 'https://placehold.co/600x400/e5e7eb/6b7280?text=No+Image';

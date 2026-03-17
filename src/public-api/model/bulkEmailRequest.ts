@@ -9,11 +9,10 @@
  */
 
 
-export interface StringIEnumerableResponseSuccessDto { 
-    success?: boolean;
-    message?: string | null;
-    data?: Array<string> | null;
-    timestamp?: string;
-    statusCode?: number;
+export interface BulkEmailRequest { 
+    toEmails?: Array<string> | null;
+    subject?: string | null;
+    body?: string | null;
+    isHtml?: boolean | null;
 }
 

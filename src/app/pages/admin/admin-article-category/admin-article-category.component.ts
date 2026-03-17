@@ -10,7 +10,7 @@ import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confi
   standalone: true,
   imports: [FormsModule, ReactiveFormsModule, CommonModule, CommonTableComponent, ConfirmDialogComponent],
   template: `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Article Categories</h1>
         <div class="mt-4 flex justify-between items-center">

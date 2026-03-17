@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { inject, Injectable } from '@angular/core';
+import { CanActivate, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
@@ -11,17 +11,14 @@ import { toObservable } from '@angular/core/rxjs-interop';
 })
 export class AdminGuard implements CanActivate {
   currentUser$: Observable<User | null>;
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {
+  private authService: AuthService = inject(AuthService);
+  private router: Router = inject(Router);
+  constructor() {
     this.currentUser$ = toObservable(this.authService.currentUser$);
   }
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean> {
+  canActivate(): Observable<boolean> {
+    console.log('AdminGuard checking user:', this.authService.getUser());
     return this.currentUser$.pipe(
       map((user: User | null) => {
         // Check if user is authenticated and has admin role

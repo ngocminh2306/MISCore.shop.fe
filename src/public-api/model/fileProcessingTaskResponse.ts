@@ -9,11 +9,13 @@
  */
 
 
-export interface StringIEnumerableResponseSuccessDto { 
-    success?: boolean;
+export interface FileProcessingTaskResponse { 
+    taskId?: string | null;
+    fileName?: string | null;
+    status?: string | null;
+    progress?: number;
     message?: string | null;
-    data?: Array<string> | null;
-    timestamp?: string;
-    statusCode?: number;
+    createdAt?: string;
+    completedAt?: string | null;
 }
 

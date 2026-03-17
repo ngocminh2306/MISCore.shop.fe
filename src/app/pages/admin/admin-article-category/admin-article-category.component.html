@@ -1,41 +1,29 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-900">Article Categories</h1>
     <div class="mt-4 flex justify-between items-center">
       <p class="text-gray-600">View and manage article categories</p>
-      <button
-        (click)="openCreateModal()"
-        class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
-      >
+      <button (click)="openCreateModal()"
+        class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
         Add New Category
       </button>
     </div>
   </div>
 
   <!-- Categories Table using Common Table Component -->
-  <app-common-table
-    [data]="categories"
-    [columns]="tableColumns"
-    tableName="categories"
-    [loading]="loading"
-    [error]="error"
-    [paginationConfig]="{
+  <app-common-table [data]="categories" [columns]="tableColumns" tableName="categories" [loading]="loading"
+    [error]="error" [paginationConfig]="{
       currentPage: currentPage,
       pageSize: pageSize,
       totalItems: totalCount,
       totalPages: totalPages
-    }"
-    [filterConfig]="{
+    }" [filterConfig]="{
       searchTerm: searchTerm,
       filters: { status: statusFilter }
-    }"
-    [showActions]="true"
-    [rowActions]="[
+    }" [showActions]="true" [rowActions]="[
       { name: 'edit', title: 'Edit', color: 'indigo' },
       { name: 'delete', title: 'Delete', color: 'red' }
-    ]"
-    (action)="handleAction($event.name, $event.item)"
-    (pageChange)="onPageChange($event)"
+    ]" (action)="handleAction($event.name, $event.item)" (pageChange)="onPageChange($event)"
     (filterChange)="onFilterChange($event)">
   </app-common-table>
 
@@ -57,130 +45,84 @@
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-            <input
-              type="text"
-              [(ngModel)]="categoryFormModel.name"
-              name="name"
-              required
+            <input type="text" [(ngModel)]="categoryFormModel.name" name="name" required
               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Category name"
-            >
+              placeholder="Category name">
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              [(ngModel)]="categoryFormModel.description"
-              name="description"
+            <textarea [(ngModel)]="categoryFormModel.description" name="description"
               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Category description"
-              rows="2"
-            ></textarea>
+              placeholder="Category description" rows="2"></textarea>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-            <input
-              type="text"
-              [(ngModel)]="categoryFormModel.slug"
-              name="slug"
+            <input type="text" [(ngModel)]="categoryFormModel.slug" name="slug"
               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Category slug"
-            >
+              placeholder="Category slug">
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Parent Category</label>
-            <select
-              [(ngModel)]="categoryFormModel.parentId"
-              name="parentId"
-              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
+            <select [(ngModel)]="categoryFormModel.parentId" name="parentId"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option [value]="null">None (Top level)</option>
-              <option *ngFor="let cat of allCategories" [value]="cat.id" [disabled]="editingCategory && cat.id === editingCategory.id">{{ cat.name }}</option>
+              <option *ngFor="let cat of allCategories" [value]="cat.id"
+                [disabled]="editingCategory && cat.id === editingCategory.id">{{ cat.name }}</option>
             </select>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-            <input
-              type="text"
-              [(ngModel)]="categoryFormModel.imageUrl"
-              name="imageUrl"
+            <input type="text" [(ngModel)]="categoryFormModel.imageUrl" name="imageUrl"
               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Category image URL"
-            >
+              placeholder="Category image URL">
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
-            <input
-              type="number"
-              [(ngModel)]="categoryFormModel.sortOrder"
-              name="sortOrder"
+            <input type="number" [(ngModel)]="categoryFormModel.sortOrder" name="sortOrder"
               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Sort order"
-            >
+              placeholder="Sort order">
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
-            <input
-              type="text"
-              [(ngModel)]="categoryFormModel.metaTitle"
-              name="metaTitle"
+            <input type="text" [(ngModel)]="categoryFormModel.metaTitle" name="metaTitle"
               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Meta title"
-            >
+              placeholder="Meta title">
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
-            <textarea
-              [(ngModel)]="categoryFormModel.metaDescription"
-              name="metaDescription"
+            <textarea [(ngModel)]="categoryFormModel.metaDescription" name="metaDescription"
               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Meta description"
-              rows="2"
-            ></textarea>
+              placeholder="Meta description" rows="2"></textarea>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Meta Keywords</label>
-            <input
-              type="text"
-              [(ngModel)]="categoryFormModel.metaKeywords"
-              name="metaKeywords"
+            <input type="text" [(ngModel)]="categoryFormModel.metaKeywords" name="metaKeywords"
               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Meta keywords"
-            >
+              placeholder="Meta keywords">
           </div>
 
           <div class="flex items-center">
-            <input
-              type="checkbox"
-              [(ngModel)]="categoryFormModel.isActive"
-              name="isActive"
-              id="isActive"
-              class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            >
+            <input type="checkbox" [(ngModel)]="categoryFormModel.isActive" name="isActive" id="isActive"
+              class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
             <label for="isActive" class="ml-2 block text-sm text-gray-700">Active</label>
           </div>
         </div>
 
         <div class="mt-6 flex justify-end space-x-3">
-          <button
-            type="button"
-            (click)="closeModal()"
-            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-          >
+          <button type="button" (click)="closeModal()"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
             Cancel
           </button>
-          <button
-            type="submit"
-            [disabled]="!categoryForm.form.valid"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <button type="submit" [disabled]="!categoryForm.form.valid"
+            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
             {{ editingCategory ? 'Update Category' : 'Create Category' }}
           </button>
         </div>
@@ -189,13 +131,8 @@
   </div>
 
   <!-- Confirm Dialog -->
-  <app-confirm-dialog
-    [isOpen]="showConfirmDialog"
-    [title]="confirmDialogTitle"
-    [message]="confirmDialogMessage"
-    [confirmButtonText]="confirmDialogConfirmText"
-    [cancelButtonText]="confirmDialogCancelText"
-    (confirmed)="onConfirmDelete()"
-    (cancelled)="onCancelDelete()">
+  <app-confirm-dialog [isOpen]="showConfirmDialog" [title]="confirmDialogTitle" [message]="confirmDialogMessage"
+    [confirmButtonText]="confirmDialogConfirmText" [cancelButtonText]="confirmDialogCancelText"
+    (confirmed)="onConfirmDelete()" (cancelled)="onCancelDelete()">
   </app-confirm-dialog>
 </div>

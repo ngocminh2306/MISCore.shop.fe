@@ -14,6 +14,7 @@ import { Payment } from './payment';
 import { Address } from './address';
 import { OrderItem } from './orderItem';
 import { PaymentMethod } from './paymentMethod';
+import { ShippingTracking } from './shippingTracking';
 
 
 export interface Order { 
@@ -46,5 +47,6 @@ export interface Order {
     isDeleted?: boolean;
     orderItems?: Array<OrderItem> | null;
     payments?: Array<Payment> | null;
+    shippingTrackings?: Array<ShippingTracking> | null;
 }
 

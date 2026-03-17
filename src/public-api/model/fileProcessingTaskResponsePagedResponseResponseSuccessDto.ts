@@ -7,12 +7,13 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { FileProcessingTaskResponsePagedResponse } from './fileProcessingTaskResponsePagedResponse';
 
 
-export interface StringIEnumerableResponseSuccessDto { 
+export interface FileProcessingTaskResponsePagedResponseResponseSuccessDto { 
     success?: boolean;
     message?: string | null;
-    data?: Array<string> | null;
+    data?: FileProcessingTaskResponsePagedResponse;
     timestamp?: string;
     statusCode?: number;
 }

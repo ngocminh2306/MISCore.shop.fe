@@ -17,7 +17,7 @@ import { ProductDto } from '../../../../public-api';
   standalone: true,
   imports: [RouterLink, FormsModule, CommonTableComponent, TranslatePipe, ConfirmDialogComponent],
   template: `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">{{ 'Admin Products' | translate }}</h1>
         <div class="mt-4 flex justify-between items-center">
@@ -206,7 +206,7 @@ export class AdminProductsComponent implements OnInit {
     private brandService: BrandService,
     private messageDialogService: MessageDialogService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Initialize table columns with translations
@@ -433,9 +433,9 @@ export class AdminProductsComponent implements OnInit {
     const newStatus = product.isActive ? this.languageService.getTranslation('inactive') : this.languageService.getTranslation('active');
 
     this.productToToggle = {
-      id: product.id  || 0,
+      id: product.id || 0,
       name: product.name,
-      currentStatus: product.isActive  || false
+      currentStatus: product.isActive || false
     };
 
     this.confirmDialogTitle = this.languageService.getTranslation('Toggle Product Status');

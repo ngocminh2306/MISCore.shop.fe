@@ -7,12 +7,13 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { FileUploadResponse } from './fileUploadResponse';
 
 
-export interface StringIEnumerableResponseSuccessDto { 
+export interface FileUploadResponseResponseSuccessDto { 
     success?: boolean;
     message?: string | null;
-    data?: Array<string> | null;
+    data?: FileUploadResponse;
     timestamp?: string;
     statusCode?: number;
 }

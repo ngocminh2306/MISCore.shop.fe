@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, catchError, filter, take, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
@@ -7,8 +7,7 @@ import { AuthService } from '../services/auth.service';
 export class TokenInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
-
-  constructor(private authService: AuthService) {}
+  private authService: AuthService = inject(AuthService);
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Check if this is an internal auth request to avoid adding tokens and infinite loops

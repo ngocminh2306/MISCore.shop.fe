@@ -10,7 +10,7 @@ import { LanguageService } from '../../../services/language.service';
   standalone: true,
   imports: [RouterLink, DecimalPipe, TranslatePipe],
   template: `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">{{ 'Admin Dashboard' | translate }}</h1>
         <p class="mt-2 text-gray-600">{{ 'Manage your store\'s products, categories, brands, and banners' | translate }}</p>
@@ -216,7 +216,7 @@ export class AdminDashboardComponent implements OnInit {
     activeBanners: 0
   });
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
     this.loadDashboardStats();

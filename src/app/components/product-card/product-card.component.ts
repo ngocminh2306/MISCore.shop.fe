@@ -20,7 +20,7 @@ import { ProductDto } from '../../../public-api';
           >
           <!-- Badge for discount -->
           @if (product.salePrice && product.salePrice > 0) {
-            <div class="absolute top-1 left-1 bg-red-500 text-white text-[0.6rem] font-bold px-1 py-0.5 rounded">
+            <div class="absolute top-1 left-1 bg-red-500 text-white text-xxs font-bold px-1 py-0.5 rounded">
               SALE
             </div>
           }
@@ -37,21 +37,21 @@ import { ProductDto } from '../../../public-api';
         <!-- Rating (placeholder) -->
         <div class="flex items-center mb-0.5">
           <div class="flex text-yellow-400">
-            <span class="text-[0.6rem]">★</span>
-            <span class="text-[0.6rem]">★</span>
-            <span class="text-[0.6rem]">★</span>
-            <span class="text-[0.6rem]">★</span>
-            <span class="text-[0.6rem]">☆</span>
+            <span class="text-xxs">★</span>
+            <span class="text-xxs">★</span>
+            <span class="text-xxs">★</span>
+            <span class="text-xxs">★</span>
+            <span class="text-xxs">☆</span>
           </div>
-          <span class="text-[0.6rem] text-gray-500 ml-0.5">(128)</span>
+          <span class="text-xxs text-gray-500 ml-0.5">(128)</span>
         </div>
 
         <!-- Price Section -->
         <div class="flex items-baseline gap-x-0.5 flex-wrap mt-auto">
           @if (product.salePrice && product.salePrice > 0) {
             <span class="text-[0.7rem] font-bold text-red-500">{{ product.salePrice | currency }}</span>
-            <span class="text-[0.6rem] text-gray-500 line-through">{{ product.price | currency }}</span>
-            <span class="text-[0.6rem] text-red-500 font-semibold ml-0.5">
+            <span class="text-xxs text-gray-500 line-through">{{ product.price | currency }}</span>
+            <span class="text-xxs text-red-500 font-semibold ml-0.5">
               {{ calculateDiscountPercentage(product.price, product.salePrice) }}% OFF
             </span>
           } @else {
@@ -60,7 +60,7 @@ import { ProductDto } from '../../../public-api';
         </div>
 
         <!-- Sales Info -->
-        <div class="text-[0.6rem] text-gray-500 mt-0.5">Sold 256</div>
+        <div class="text-xxs text-gray-500 mt-0.5">Sold 256</div>
       </div>
 
       <!-- Add to Cart Button (hidden by default, appears on hover) -->
@@ -104,7 +104,7 @@ import { ProductDto } from '../../../public-api';
         font-size: 0.5rem !important;
       }
 
-      div.text-\[0\.6rem\] {
+      div.text-xxs {
         font-size: 0.5rem !important;
       }
 

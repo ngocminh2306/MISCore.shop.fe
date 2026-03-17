@@ -62,6 +62,7 @@ export class CategoryGridComponent implements OnChanges {
     this.categorySelected.emit(category);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onImageError(event: any, categoryName: string): void {
     // Set a fallback image with category name if the primary image fails to load
     event.target.src = `https://placehold.co/64x64/4f46e5/ffffff?text=${encodeURIComponent(categoryName.charAt(0))}`;

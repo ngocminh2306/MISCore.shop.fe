@@ -31,18 +31,16 @@ export class AuthService {
   private isLoggedInSignal = signal(false);
   private isLoadingSignal = signal(true); // Initially loading state is true
   private platformId = inject(PLATFORM_ID);
-
+  AUTH_TOKEN = 'authToken'; // Store the auth token in memory as well
   currentUser$ = this.currentUserSignal.asReadonly();
   isLoggedIn$ = this.isLoggedInSignal.asReadonly();
   isLoading$ = this.isLoadingSignal.asReadonly();
-
-  constructor(
-    private accountService: AccountService
-  ) {
+  private accountService: AccountService = inject(AccountService);
+  constructor() {
     // Initialize from localStorage if available and if in browser
     if (isPlatformBrowser(this.platformId)) {
       const storedUser = localStorage.getItem('currentUser');
-      const storedToken = localStorage.getItem('authToken');
+      const storedToken = localStorage.getItem(this.AUTH_TOKEN);
 
       if (storedUser && storedToken) {
         try {
@@ -52,8 +50,8 @@ export class AuthService {
         } catch (e) {
           console.error('Error parsing stored user from localStorage', e);
         }
-      } else if(storedToken) {
-          this.isLoggedInSignal.set(true);
+      } else if (storedToken) {
+        this.isLoggedInSignal.set(true);
       }
     }
 
@@ -68,7 +66,7 @@ export class AuthService {
    */
   getToken(): string | null {
     if (isPlatformBrowser(this.platformId)) {
-      return localStorage.getItem('authToken');
+      return localStorage.getItem(this.AUTH_TOKEN);
     }
     return null;
   }
@@ -78,7 +76,7 @@ export class AuthService {
    */
   private setToken(token: string): void {
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('authToken', token);
+      localStorage.setItem(this.AUTH_TOKEN, token);
     }
   }
 
@@ -87,7 +85,7 @@ export class AuthService {
    */
   private removeToken(): void {
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('authToken');
+      localStorage.removeItem(this.AUTH_TOKEN);
     }
   }
 
@@ -97,7 +95,7 @@ export class AuthService {
   public clearAuthData(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('currentUser');
-      localStorage.removeItem('authToken');
+      localStorage.removeItem(this.AUTH_TOKEN);
     }
     this.currentUserSignal.set(null);
     this.isLoggedInSignal.set(false);
@@ -158,7 +156,7 @@ export class AuthService {
         if (isPlatformBrowser(this.platformId)) {
           localStorage.setItem('currentUser', JSON.stringify(user));
         }
-
+        console.log('User info loaded after login', user);
         return {
           message: 'Login successful',
           userId: user.id,

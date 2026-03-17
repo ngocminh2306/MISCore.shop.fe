@@ -190,6 +190,17 @@ import { PLATFORM_ID } from '@angular/core';
                   </svg>
                   {{ 'Banners' | translate }}
                 </a>
+
+                <a
+                  [routerLink]="['/admin/file-processing']"
+                  routerLinkActive="bg-gray-900 text-white"
+                  class="text-gray-300 hover:bg-gray-700 hover:text-white group flex items-center px-4 py-2 text-sm font-medium rounded-md"
+                >
+                  <svg class="text-gray-400 group-hover:text-gray-300 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {{ 'File Processing' | translate }}
+                </a>
               </div>
             </div>
           </nav>
@@ -293,11 +304,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   languageService = inject(LanguageService);
   private languageSubscription?: Subscription;
   private platformId = inject(PLATFORM_ID);
-
-  constructor(
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     this.user = this.authService.getUser();
@@ -332,7 +340,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   getPageTitle(): string {
     if (isPlatformBrowser(this.platformId)) {
-    const url = window.location.pathname;
+      const url = window.location.pathname;
       if (url.includes('/admin/dashboard')) return 'Dashboard';
       if (url.includes('/admin/products')) return 'Products';
       if (url.includes('/admin/categories')) return 'Categories';
@@ -345,6 +353,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       if (url.includes('/admin/articles')) return 'Articles';
       if (url.includes('/admin/article-categories')) return 'Article Categories';
       if (url.includes('/admin/article-authors')) return 'Article Authors';
+      if (url.includes('/admin/file-processing')) return 'File Processing';
       if (url.includes('/admin/products/new') || url.includes('/admin/products/edit')) return 'Product Details';
       if (url.includes('/admin/categories/new') || url.includes('/admin/categories/edit')) return 'Category Details';
       if (url.includes('/admin/brands/new') || url.includes('/admin/brands/edit')) return 'Brand Details';

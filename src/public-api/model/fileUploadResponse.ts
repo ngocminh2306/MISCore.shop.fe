@@ -9,11 +9,11 @@
  */
 
 
-export interface StringIEnumerableResponseSuccessDto { 
-    success?: boolean;
+export interface FileUploadResponse { 
+    taskId?: string | null;
+    fileName?: string | null;
+    fileSize?: number;
+    status?: string | null;
     message?: string | null;
-    data?: Array<string> | null;
-    timestamp?: string;
-    statusCode?: number;
 }
 
