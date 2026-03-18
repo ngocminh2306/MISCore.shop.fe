@@ -13,6 +13,7 @@ api/brand.service.ts
 api/cart.service.ts
 api/category.service.ts
 api/dashboard.service.ts
+api/documentOcr.service.ts
 api/email.service.ts
 api/file.service.ts
 api/fileProcessing.service.ts

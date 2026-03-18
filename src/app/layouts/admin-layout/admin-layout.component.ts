@@ -201,6 +201,17 @@ import { PLATFORM_ID } from '@angular/core';
                   </svg>
                   {{ 'File Processing' | translate }}
                 </a>
+
+                <a
+                  [routerLink]="['/admin/ocr-document']"
+                  routerLinkActive="bg-gray-900 text-white"
+                  class="text-gray-300 hover:bg-gray-700 hover:text-white group flex items-center px-4 py-2 text-sm font-medium rounded-md"
+                >
+                  <svg class="text-gray-400 group-hover:text-gray-300 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ 'OCR Document' | translate }}
+                </a>
               </div>
             </div>
           </nav>
@@ -354,6 +365,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       if (url.includes('/admin/article-categories')) return 'Article Categories';
       if (url.includes('/admin/article-authors')) return 'Article Authors';
       if (url.includes('/admin/file-processing')) return 'File Processing';
+      if (url.includes('/admin/ocr-document')) return 'OCR Document';
       if (url.includes('/admin/products/new') || url.includes('/admin/products/edit')) return 'Product Details';
       if (url.includes('/admin/categories/new') || url.includes('/admin/categories/edit')) return 'Category Details';
       if (url.includes('/admin/brands/new') || url.includes('/admin/brands/edit')) return 'Brand Details';

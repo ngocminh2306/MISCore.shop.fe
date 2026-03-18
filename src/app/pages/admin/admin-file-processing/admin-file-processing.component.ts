@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { FileProcessingService } from '../../../../public-api/api/fileProcessing.service';
@@ -405,6 +405,7 @@ export class AdminFileProcessingComponent implements OnInit, OnDestroy {
   };
 
   private refreshSubscription?: Subscription;
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     this.loadStatistics();
@@ -427,9 +428,11 @@ export class AdminFileProcessingComponent implements OnInit, OnDestroy {
     this.fileProcessingService.apiFileProcessingStatisticsGet().subscribe({
       next: (response) => {
         this.statistics = response.data || null;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading statistics:', error);
+        this.cdr.markForCheck();
       }
     });
   }
@@ -450,11 +453,13 @@ export class AdminFileProcessingComponent implements OnInit, OnDestroy {
         this.paginationConfig.totalItems = response.data?.totalItems || 0;
         this.paginationConfig.totalPages = response.data?.totalPages || 0;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading tasks:', error);
         this.error = this.languageService.getTranslation('Failed to load tasks. Please try again.');
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }

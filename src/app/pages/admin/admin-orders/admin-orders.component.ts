@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CurrencyPipe, CommonModule } from '@angular/common';
 import { OrderDto, OrderService } from '../../../../public-api';
@@ -7,24 +7,30 @@ import { FormsModule } from '@angular/forms';
 import { MessageDialogService } from '../../../services/message-dialog.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { LanguageService } from '../../../services/language.service';
+import { CommonTableComponent, TableColumn } from '../../../components/common-table/common-table.component';
+
 
 @Component({
   selector: 'app-admin-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe, TranslatePipe],
+  imports: [CommonModule, FormsModule, CurrencyPipe, TranslatePipe, CommonTableComponent],
   template: `
-    <div class="container mx-auto px-4 py-8">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">{{ 'Admin Orders' | translate }}</h1>
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">{{ 'Admin Orders' | translate }}</h1>
+        <div class="mt-4 flex justify-between items-center">
+          <p class="text-gray-600">{{ 'View and manage customer orders' | translate }}</p>
+        </div>
       </div>
 
       <!-- Filters and Search -->
       <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Search' | translate }}</label>
+            <label for="order-search" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Search' | translate }}</label>
             <input
               type="text"
+              id="order-search"
               [(ngModel)]="searchTerm"
               (keyup.enter)="loadOrders(1)"
               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -32,8 +38,9 @@ import { LanguageService } from '../../../services/language.service';
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Status' | translate }}</label>
+            <label for="order-status" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Status' | translate }}</label>
             <select
+              id="order-status"
               [(ngModel)]="selectedStatus"
               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
               <option value="">{{ 'All Statuses' | translate }}</option>
@@ -47,24 +54,27 @@ import { LanguageService } from '../../../services/language.service';
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Date From' | translate }}</label>
+            <label for="order-date-from" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Date From' | translate }}</label>
             <input
+              id="order-date-from"
               type="date"
               [(ngModel)]="dateFrom"
               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Date To' | translate }}</label>
+            <label for="order-date-to" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Date To' | translate }}</label>
             <input
+              id="order-date-to"
               type="date"
               [(ngModel)]="dateTo"
               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Sort By' | translate }}</label>
+            <label for="order-sort-by" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Sort By' | translate }}</label>
             <select
+              id="order-sort-by"
               [(ngModel)]="sortBy"
               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
               <option value="orderDate">{{ 'Date' | translate }}</option>
@@ -75,8 +85,9 @@ import { LanguageService } from '../../../services/language.service';
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'Order' | translate }}</label>
+            <label for="order-sort-order" class="block text-sm font-medium text-gray-700 mb-1">{{ 'Order' | translate }}</label>
             <select
+              id="order-sort-order"
               [(ngModel)]="sortOrder"
               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
               <option value="asc">{{ 'Ascending' | translate }}</option>
@@ -99,239 +110,173 @@ import { LanguageService } from '../../../services/language.service';
         </div>
       </div>
 
-      <!-- Loading indicator -->
-      <div *ngIf="loading" class="text-center py-8">
-        <p class="text-gray-600">Loading orders...</p>
-      </div>
+      <!-- Orders Table using CommonTable Component -->
+      <misc-common-table
+        [data]="orders"
+        [columns]="tableColumns"
+        tableName="orders"
+        [loading]="loading"
+        [error]="error"
+        [paginationConfig]="{
+          currentPage: currentPage,
+          pageSize: pageSize,
+          totalItems: totalCount,
+          totalPages: totalPages
+        }"
+        [filterConfig]="{
+          searchTerm: searchTerm,
+          filters: { status: selectedStatus }
+        }"
+        [showActions]="true"
+        [rowActions]="[
+          { name: 'view', title: 'Order Detail', color: 'indigo' },
+          { name: 'ship', title: 'Ship', color: 'blue', class: 'ship-action' },
+          { name: 'deliver', title: 'Deliver', color: 'green', class: 'deliver-action' },
+          { name: 'cancel', title: 'Cancel', color: 'red', class: 'cancel-action' }
+        ]"
+        (action)="handleAction($event.name, $event.item)"
+        (pageChange)="onPageChange($event)"
+        (filterChange)="onFilterChange($event)">
+      </misc-common-table>
 
-      <!-- Error message -->
-      <div *ngIf="!loading && error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-        <span class="block sm:inline">{{ error }}</span>
-      </div>
+      <!-- Order Detail Modal -->
+      @if (showOrderDetail) {
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-lg p-6 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold">
+                {{ 'Order Details' | translate }}
+              </h3>
+              <button (click)="closeOrderDetail()" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
 
-      <!-- Orders table -->
-      <div *ngIf="!loading && orders.length > 0" class="bg-white rounded-lg shadow-md overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Order ID' | translate }}</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Customer' | translate }}</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Date' | translate }}</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Status' | translate }}</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Total' | translate }}</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Payment' | translate }}</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Actions' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr *ngFor="let order of orders">
-              <td class="px-6 py-4 whitespace-nowrap">{{ order.orderNumber }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">{{ order.userId }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(order.orderDate || '') }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span [ngClass]="getStatusClass(order.orderStatus || '')" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                  {{ order.orderStatus }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">{{ order.totalAmount | currency }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">{{ order.paymentMethodName || 'N/A' }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <button
-                  (click)="viewOrder(order.id || 0)"
-                  class="text-indigo-600 hover:text-indigo-900 mr-3">{{ 'Order Detail' | translate }}</button>
+            @if (selectedOrder) {
+              <div class="mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="border-b pb-2">
+                    <p class="text-sm text-gray-600">{{ 'Order Number' | translate }}</p>
+                    <p class="font-medium">{{ selectedOrder.orderNumber }}</p>
+                  </div>
 
-                <button
-                  *ngIf="order.orderStatus === 'shipped'"
-                  (click)="markAsDelivered(order.id || 0)"
-                  class="ml-2 text-green-600 hover:text-green-900">{{ 'Deliver' | translate }}</button>
+                  <div class="border-b pb-2">
+                    <p class="text-sm text-gray-600">{{ 'Status' | translate }}</p>
+                    <p class="font-medium">
+                      <span [ngClass]="getStatusClass(selectedOrder.orderStatus)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                        {{ selectedOrder.orderStatus }}
+                      </span>
+                    </p>
+                  </div>
 
-                <button
-                  *ngIf="order.orderStatus === 'processing'"
-                  (click)="markAsShipped(order.id || 0)"
-                  class="ml-2 text-blue-600 hover:text-blue-900">{{ 'Ship' | translate }}</button>
+                  <div class="border-b pb-2">
+                    <p class="text-sm text-gray-600">{{ 'Date' | translate }}</p>
+                    <p class="font-medium">{{ formatDate(selectedOrder.orderDate) }}</p>
+                  </div>
 
-                <button
-                  *ngIf="order.orderStatus !== 'cancelled'"
-                  (click)="cancelOrder(order.id || 0)"
-                  class="ml-2 text-red-600 hover:text-red-900"
-                  [disabled]="order.orderStatus === 'cancelled' || order.orderStatus === 'delivered'">{{ 'Cancel' | translate }}</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                  <div class="border-b pb-2">
+                    <p class="text-sm text-gray-600">{{ 'Customer' | translate }}</p>
+                    <p class="font-medium">{{ selectedOrder.userName || selectedOrder.userId }}</p>
+                  </div>
 
-      <!-- No orders message -->
-      <div *ngIf="!loading && orders.length === 0" class="text-center py-8">
-        <p class="text-gray-600">{{ 'No orders found.' | translate }}</p>
-      </div>
+                  <div class="border-b pb-2">
+                    <p class="text-sm text-gray-600">{{ 'Subtotal' | translate }}</p>
+                    <p class="font-medium">{{ selectedOrder.subtotal | currency }}</p>
+                  </div>
 
-      <!-- Pagination -->
-      <div *ngIf="!loading && orders.length > 0" class="mt-8 flex justify-center">
-        <nav class="flex items-center space-x-2">
-          <button
-            class="px-3 py-1 rounded-md bg-gray-200"
-            [disabled]="currentPage <= 1"
-            (click)="loadOrders(currentPage - 1)">
-            {{ 'Previous' | translate }}
-          </button>
-          <button
-            *ngFor="let page of getPages()"
-            class="px-3 py-1 rounded-md"
-            [ngClass]="page === currentPage ? 'bg-indigo-600 text-white' : 'bg-gray-200'"
-            (click)="loadOrders(page)">
-            {{ page }}
-          </button>
-          <button
-            class="px-3 py-1 rounded-md bg-gray-200"
-            [disabled]="currentPage >= totalPages"
-            (click)="loadOrders(currentPage + 1)">
-            {{ 'Next' | translate }}
-          </button>
-        </nav>
-      </div>
-    </div>
+                  <div class="border-b pb-2">
+                    <p class="text-sm text-gray-600">{{ 'Tax' | translate }}</p>
+                    <p class="font-medium">{{ selectedOrder.taxAmount | currency }}</p>
+                  </div>
 
-    <!-- Order Detail Modal -->
-    <div *ngIf="showOrderDetail" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" id="order-detail-modal">
-      <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-          <div class="flex justify-between items-center pb-3 border-b">
-            <h3 class="text-lg font-semibold text-gray-900">{{ 'Order Details' | translate }}</h3>
-            <button
-              (click)="closeOrderDetail()"
-              class="text-gray-500 hover:text-gray-700">
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+                  <div class="border-b pb-2">
+                    <p class="text-sm text-gray-600">{{ 'Shipping' | translate }}</p>
+                    <p class="font-medium">{{ selectedOrder.shippingCost?.toFixed(2) | currency }}</p>
+                  </div>
 
-          <div *ngIf="selectedOrder" class="mt-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="border-b pb-2">
-                <p class="text-sm text-gray-600">{{ 'Order Number' | translate }}</p>
-                <p class="font-medium">{{ selectedOrder.orderNumber }}</p>
-              </div>
+                  <div class="border-b pb-2">
+                    <p class="text-sm text-gray-600">{{ 'Total' | translate }}</p>
+                    <p class="font-medium font-bold">{{ selectedOrder.totalAmount | currency }}</p>
+                  </div>
 
-              <div class="border-b pb-2 relative">
-                <p class="text-sm text-gray-600">{{ 'Status' | translate }}</p>
-                <div class="flex items-center">
-                  <span class="font-medium mr-2" [ngClass]="getStatusClass(selectedOrder.orderStatus || '')">{{ selectedOrder.orderStatus }}</span>
-                  <button *ngIf="getAvailableStatusesForOrder(selectedOrder)"
-                    type="button"
-                    class="inline-flex justify-center px-3 py-1 text-sm font-medium text-indigo-600 bg-indigo-100 rounded hover:bg-indigo-200"
-                    (click)="toggleOrderMenu(selectedOrder.id || 0)">
-                    {{ 'Change' | translate }}
-                  </button>
-                </div>
+                  <div class="border-b pb-2 col-span-2">
+                    <p class="text-sm text-gray-600">{{ 'Payment Method' | translate }}</p>
+                    <p class="font-medium">{{ selectedOrder.paymentMethodName || 'N/A' }}</p>
+                  </div>
 
-                <div
-                  *ngIf="activeOrderMenu === selectedOrder.id"
-                  class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
-                  role="menu">
-                  <div class="py-1" role="none">
-                    <button
-                      *ngFor="let status of getAvailableStatusesForOrder(selectedOrder)"
-                      (click)="updateOrderStatus(selectedOrder.id || 0, status.value)"
-                      class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                      role="menuitem">
-                      {{ status.label }}
-                    </button>
+                  <div class="border-b pb-2 col-span-2">
+                    <p class="text-sm text-gray-600">{{ 'Shipping Method' | translate }}</p>
+                    <p class="font-medium">{{ selectedOrder.shippingMethodName || 'N/A' }}</p>
                   </div>
                 </div>
-              </div>
 
-              <div class="border-b pb-2">
-                <p class="text-sm text-gray-600">{{ 'Date' | translate }}</p>
-                <p class="font-medium">{{ formatDate(selectedOrder.orderDate || '') }}</p>
+                <!-- Order Items -->
+                @if (selectedOrder.orderItems && selectedOrder.orderItems.length > 0) {
+                  <div class="mt-4">
+                    <h4 class="text-md font-semibold mb-2">{{ 'Order Items' | translate }}</h4>
+                    <div class="overflow-x-auto">
+                      <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                          <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Product' | translate }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Quantity' | translate }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Unit Price' | translate }}</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Total' | translate }}</th>
+                          </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                          @for (item of selectedOrder.orderItems; track item.id) {
+                            <tr>
+                              <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ item.productName }}
+                              </td>
+                              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                {{ item.quantity }}
+                              </td>
+                              <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                {{ item.unitPrice | currency }}
+                              </td>
+                              <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ item.totalPrice | currency }}
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                }
               </div>
-
-              <div class="border-b pb-2">
-                <p class="text-sm text-gray-600">{{ 'Customer ID' | translate }}</p>
-                <p class="font-medium">{{ selectedOrder.userId }}</p>
-              </div>
-
-              <div class="border-b pb-2">
-                <p class="text-sm text-gray-600">{{ 'Subtotal' | translate }}</p>
-                <p class="font-medium">{{ selectedOrder.subtotal | currency }}</p>
-              </div>
-
-              <div class="border-b pb-2">
-                <p class="text-sm text-gray-600">{{ 'Tax' | translate }}</p>
-                <p class="font-medium">{{ selectedOrder.taxAmount | currency }}</p>
-              </div>
-
-              <div class="border-b pb-2">
-                <p class="text-sm text-gray-600">{{ 'Shipping' | translate }}</p>
-                <p class="font-medium">{{ selectedOrder.shippingCost?.toFixed(2) | currency }}</p>
-              </div>
-
-              <div class="border-b pb-2">
-                <p class="text-sm text-gray-600">{{ 'Total' | translate }}</p>
-                <p class="font-medium font-bold">{{ selectedOrder.totalAmount | currency }}</p>
-              </div>
-
-              <div class="border-b pb-2 col-span-2">
-                <p class="text-sm text-gray-600">{{ 'Payment Method' | translate }}</p>
-                <p class="font-medium">{{ selectedOrder.paymentMethodName || 'N/A' }}</p>
-              </div>
-
-              <div class="border-b pb-2 col-span-2">
-                <p class="text-sm text-gray-600">{{ 'Shipping Method' | translate }}</p>
-                <p class="font-medium">{{ selectedOrder.shippingMethodName || 'N/A' }}</p>
-              </div>
-            </div>
-
-            <!-- Order Items -->
-            <div class="mt-4">
-              <h4 class="text-md font-semibold mb-2">{{ 'Order Items' | translate }}</h4>
-              <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                  <thead class="bg-gray-50">
-                    <tr>
-                      <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Product' | translate }}</th>
-                      <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Quantity' | translate }}</th>
-                      <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Unit Price' | translate }}</th>
-                      <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'Total' | translate }}</th>
-                    </tr>
-                  </thead>
-                  <tbody class="bg-white divide-y divide-gray-200">
-                    <tr *ngFor="let item of selectedOrder.orderItems">
-                      <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {{ item.productName }}
-                      </td>
-                      <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                        {{ item.quantity }}
-                      </td>
-                      <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                        {{ item.unitPrice | currency }}
-                      </td>
-                      <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {{ item.totalPrice | currency }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            }
           </div>
         </div>
-      </div>
+      }
     </div>
   `,
   styles: [`
     :host {
       display: block;
+      background-color: #f9fafb;
+      min-height: calc(100vh - 200px);
     }
   `]
 })
 export class AdminOrdersComponent implements OnInit {
+  private readonly orderService = inject(OrderService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly messageDialogService = inject(MessageDialogService);
+  private readonly languageService = inject(LanguageService);
+  private cdr = inject(ChangeDetectorRef);
+
   orders: OrderDto[] = [];
   loading = false;
   error: string | null = null;
   currentPage = 1;
   pageSize = 10;
+  totalCount = 0;
   totalPages = 0;
 
   // Filter parameters
@@ -342,10 +287,7 @@ export class AdminOrdersComponent implements OnInit {
 
   // Sort parameters
   sortBy: string = 'orderDate';
-  sortOrder: string = 'desc'; // 'asc' or 'desc'
-
-  // Menu states
-  activeOrderMenu: number | null = null;
+  sortOrder: string = 'desc';
 
   // Order detail view
   showOrderDetail = false;
@@ -367,18 +309,55 @@ export class AdminOrdersComponent implements OnInit {
     'Processing': ['Shipped', 'Cancelled'],
     'Shipped': ['Delivered', 'Cancelled'],
     'Delivered': ['Refunded'],
-    'Cancelled': [],  // Cannot change status once cancelled
-    'Refunded': []    // Cannot change status once refunded
+    'Cancelled': [],
+    'Refunded': []
   };
 
-  private languageService = inject(LanguageService);
-
-  constructor(
-    private orderService: OrderService,
-    private authService: AuthService,
-    private router: Router,
-    private messageDialogService: MessageDialogService
-  ) { }
+  // Table configuration
+  tableColumns: TableColumn[] = [
+    {
+      key: 'orderNumber',
+      title: 'Order ID',
+      sortable: true,
+      type: 'text',
+      width: '15%'
+    },
+    {
+      key: 'userName',
+      title: 'Customer',
+      sortable: true,
+      type: 'text',
+      width: '20%'
+    },
+    {
+      key: 'orderDate',
+      title: 'Date',
+      sortable: true,
+      type: 'date',
+      width: '15%'
+    },
+    {
+      key: 'orderStatus',
+      title: 'Status',
+      sortable: true,
+      type: 'text',
+      width: '15%'
+    },
+    {
+      key: 'totalAmount',
+      title: 'Total',
+      sortable: true,
+      type: 'number',
+      width: '15%'
+    },
+    {
+      key: 'paymentMethodName',
+      title: 'Payment',
+      sortable: false,
+      type: 'text',
+      width: '20%'
+    }
+  ];
 
   ngOnInit(): void {
     this.loadOrders(1);
@@ -389,50 +368,60 @@ export class AdminOrdersComponent implements OnInit {
     this.error = null;
     this.currentPage = page;
 
-    // Format dates if provided
     const startDate = this.dateFrom ? new Date(this.dateFrom).toISOString() : undefined;
     const endDate = this.dateTo ? new Date(this.dateTo).toISOString() : undefined;
 
-    // Call API
     this.orderService.apiOrderGet(
       page,
       this.pageSize,
-      undefined, // userId
-      undefined, // orderStatusId - we'll handle status by name in the filter
-      undefined, // paymentMethodId
-      undefined, // shippingMethodId
+      undefined,
+      undefined,
+      undefined,
+      undefined,
       startDate,
       endDate,
-      undefined, // minTotal
-      undefined, // maxTotal
-      undefined, // orderNumber
+      undefined,
+      undefined,
+      undefined,
       this.searchTerm || undefined,
-      this.sortBy || undefined, // sortBy
-      this.sortOrder || undefined  // sortOrder
+      this.sortBy || undefined,
+      this.sortOrder || undefined
     ).subscribe({
       next: (response) => {
-        // Extract orders data from response
-        let ordersData;
+        let ordersData: OrderDto[] = [];
         let totalCount = 0;
-
-        if (response && response.data && response.data.items) {
+        this.cdr.markForCheck();
+        if (response?.data?.items) {
           ordersData = response.data.items;
           totalCount = response.data.totalCount || 0;
         }
 
-        // Apply status filter on the client side if needed
+        // Map to Order interface and apply status filter
+        let filteredOrders: OrderDto[] = ordersData.map((dto: OrderDto) => ({
+          id: dto.id || 0,
+          orderNumber: dto.orderNumber,
+          userId: dto.userId,
+          userName: dto.userName,
+          orderStatus: dto.orderStatus || '',
+          orderDate: dto.orderDate || '',
+          totalAmount: dto.totalAmount || 0,
+          paymentMethodName: dto.paymentMethodName,
+          shippingMethodName: dto.shippingMethodName
+        }));
+
         if (this.selectedStatus) {
-          ordersData = ordersData?.filter((order: any) =>
-            order.orderStatus.toLowerCase() === this.selectedStatus.toLowerCase()
+          filteredOrders = filteredOrders.filter((order) =>
+            order.orderStatus?.toLowerCase() === this.selectedStatus.toLowerCase()
           );
         }
 
-        this.orders = ordersData || [];
+        this.orders = filteredOrders;
+        this.totalCount = totalCount;
         this.totalPages = Math.ceil(totalCount / this.pageSize);
-
         this.loading = false;
       },
-      error: (error: any) => {
+      error: (error) => {
+        this.cdr.markForCheck();
         console.error('Error loading orders:', error);
         this.error = 'Failed to load orders. Please try again later.';
         this.loading = false;
@@ -440,12 +429,18 @@ export class AdminOrdersComponent implements OnInit {
     });
   }
 
-  formatDate(date: Date | string): string {
+  formatDate(date: string | undefined | null): string {
+    if (!date) {
+      return '';
+    }
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     return dateObj.toLocaleDateString();
   }
 
-  getStatusClass(status: string): string {
+  getStatusClass(status: string | undefined | null): string {
+    if (!status) {
+      return 'bg-gray-100 text-gray-800';
+    }
     switch (status.toLowerCase()) {
       case 'completed':
       case 'delivered':
@@ -464,41 +459,34 @@ export class AdminOrdersComponent implements OnInit {
     }
   }
 
-  getPages(): number[] {
-    const pages = [];
-    const startPage = Math.max(1, this.currentPage - 2);
-    const endPage = Math.min(this.totalPages, this.currentPage + 2);
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  }
-
   viewOrder(orderId: number): void {
-    // Find the order in the current list
     const order = this.orders.find(o => o.id === orderId);
     if (order) {
       this.selectedOrder = order;
       this.showOrderDetail = true;
     } else {
-      // If not found in current list, fetch the specific order
       this.orderService.apiOrderIdGet(orderId).subscribe({
-        next: (response: any) => {
-          this.selectedOrder = response;
+        next: (response) => {
+          const dto = response.data as OrderDto;
+          this.selectedOrder = {
+            id: dto.id || 0,
+            orderNumber: dto.orderNumber,
+            userId: dto.userId,
+            userName: dto.userName,
+            orderStatus: dto.orderStatus || '',
+            orderDate: dto.orderDate || '',
+            totalAmount: dto.totalAmount || 0,
+            paymentMethodName: dto.paymentMethodName,
+            shippingMethodName: dto.shippingMethodName
+          };
           this.showOrderDetail = true;
         },
-        error: (error: any) => {
+        error: (error) => {
           console.error('Error loading order details:', error);
           this.error = 'Failed to load order details.';
         }
       });
     }
-  }
-
-  toggleOrderMenu(orderId: number): void {
-    this.activeOrderMenu = this.activeOrderMenu === orderId ? null : orderId;
   }
 
   closeOrderDetail(): void {
@@ -507,14 +495,12 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   updateOrderStatus(orderId: number, newStatus: string): void {
-    // Find the order being updated
     const updatingOrder = this.orders.find(order => order.id === orderId);
     if (!updatingOrder) {
       this.messageDialogService.error('Order not found', 'Error');
       return;
     }
 
-    // Validate if the status transition is allowed
     const availableStatuses = this.getAvailableStatusesForOrder(updatingOrder);
     const isValidTransition = availableStatuses.some(status => status.value === newStatus);
 
@@ -525,111 +511,41 @@ export class AdminOrdersComponent implements OnInit {
       return;
     }
 
-    // Confirm the status change with the user
     const confirmMessage = `Changing order status from "${updatingOrder.orderStatus}" to "${newStatus}". Are you sure?`;
     if (!confirm(confirmMessage)) {
-      return; // User cancelled
+      return;
     }
 
-    // Disable the menu during the request
-    this.activeOrderMenu = null;
-
-    // Show loading state by updating the order temporarily
     updatingOrder.orderStatus = `${newStatus} (Updating...)`;
 
-    // Update the order status with the API
     this.orderService.apiOrderIdStatusPut(orderId, this.mapStatusNameToId(newStatus)).subscribe({
-      next: (response: any) => {
+      next: () => {
         console.log(`Order ${orderId} status updated to ${newStatus}`);
-
-        // Show success notification
         this.messageDialogService.success(`Order ${orderId} status successfully updated to ${newStatus}`, 'Success');
-
-        this.loadOrders(this.currentPage); // Refresh the list
+        this.loadOrders(this.currentPage);
       },
-      error: (error: any) => {
+      error: (error) => {
         console.error('Error updating order status:', error);
-
-        // Restore the original order status if it was updated temporarily
-        // We'll reload all orders anyway, so this is just visual restoration until reload
         if (updatingOrder) {
           updatingOrder.orderStatus = this.orders.find(o => o.id === orderId)?.orderStatus || updatingOrder.orderStatus;
         }
-
         const errorMessage = error?.error?.message || error?.message || 'Failed to update order status. Please try again.';
         this.error = errorMessage;
-
-        // Show error message using message dialog service
         this.messageDialogService.error(`Error updating order status: ${errorMessage}`, 'Error');
       }
     });
   }
 
-  /**
-   * Get available statuses for a specific order based on current status and allowed transitions
-   * @param order The order to check allowed transitions for
-   * @returns Array of available status options
-   */
   getAvailableStatusesForOrder(order: OrderDto): { label: string, value: string }[] {
-    // If the order has pre-computed available statuses, return them
-    if ('availableStatuses' in order && order.availableStatuses) {
-      return order.availableStatuses as { label: string, value: string }[];
-    }
-
-    // Otherwise, compute them on the fly (for orders loaded separately)
     const currentStatus = order.orderStatus || '';
-
-    // Get allowed transitions for the current status
     const allowedTransitions = this.statusTransitions[currentStatus] || [];
 
-    // Filter the available statuses to only include allowed transitions
     return this.availableStatuses.filter(status =>
       allowedTransitions.includes(status.value)
     );
   }
 
-  /**
-   * Handle status change from select dropdown
-   * @param order The order being updated
-   * @param event The change event
-   */
-  onStatusChange(order: OrderDto, value: any): void {
-    const newStatus = value;
-
-    // If no status selected (empty option), do nothing
-    if (!newStatus) {
-      return;
-    }
-
-    // Validate if the status transition is allowed
-    const availableStatuses = this.getAvailableStatusesForOrder(order);
-    const isValidTransition = availableStatuses.some(status => status.value.toLocaleLowerCase() === newStatus.toLocaleLowerCase());
-
-    if (!isValidTransition) {
-      const errorMessage = `Invalid status transition. From "${order.orderStatus}", you can only change to: ${this.statusTransitions[order.orderStatus || '']?.join(', ') || 'no other statuses'}.`;
-      this.messageDialogService.error(errorMessage, 'Invalid Status Change');
-      console.warn('Invalid status transition attempted:', order.orderStatus, '->', newStatus);
-
-      // Reset the select to the current status
-      value = order.orderStatus;
-      return;
-    }
-
-    // Confirm the status change with the user
-    const confirmMessage = `Changing order status from "${order.orderStatus}" to "${newStatus}". Are you sure?`;
-    if (!confirm(confirmMessage)) {
-      // Reset the select to the current status if user cancels
-      value = order.orderStatus;
-      return; // User cancelled
-    }
-
-    // Update the order status
-    this.updateOrderStatus(order.id || 0, newStatus);
-  }
-
   private mapStatusNameToId(statusName: string): number {
-    // This is a temporary mapping - in a real app, you would likely fetch these from an API
-    // Map status names to IDs as expected by the backend
     const statusMap: { [key: string]: number } = {
       'Pending': 1,
       'Processing': 2,
@@ -639,31 +555,35 @@ export class AdminOrdersComponent implements OnInit {
       'Refunded': 6
     };
 
-    return statusMap[statusName] || 1; // Default to 'Pending' ID
+    return statusMap[statusName] || 1;
   }
 
   markAsShipped(orderId: number): void {
     this.orderService.apiOrderIdMarkShippedPut(orderId).subscribe({
-      next: (response: any) => {
+      next: () => {
         console.log(`Order ${orderId} marked as shipped`);
+        this.messageDialogService.success(`Order ${orderId} marked as shipped`, 'Success');
         this.loadOrders(this.currentPage);
       },
-      error: (error: any) => {
+      error: (error) => {
         console.error('Error marking order as shipped:', error);
         this.error = 'Failed to mark order as shipped.';
+        this.messageDialogService.error('Failed to mark order as shipped.', 'Error');
       }
     });
   }
 
   markAsDelivered(orderId: number): void {
     this.orderService.apiOrderIdMarkDeliveredPut(orderId).subscribe({
-      next: (response: any) => {
+      next: () => {
         console.log(`Order ${orderId} marked as delivered`);
+        this.messageDialogService.success(`Order ${orderId} marked as delivered`, 'Success');
         this.loadOrders(this.currentPage);
       },
-      error: (error: any) => {
+      error: (error) => {
         console.error('Error marking order as delivered:', error);
         this.error = 'Failed to mark order as delivered.';
+        this.messageDialogService.error('Failed to mark order as delivered.', 'Error');
       }
     });
   }
@@ -671,13 +591,15 @@ export class AdminOrdersComponent implements OnInit {
   cancelOrder(orderId: number): void {
     if (confirm('Are you sure you want to cancel this order?')) {
       this.orderService.apiOrderIdCancelPut(orderId).subscribe({
-        next: (response: any) => {
+        next: () => {
           console.log(`Order ${orderId} cancelled`);
+          this.messageDialogService.success(`Order ${orderId} cancelled`, 'Success');
           this.loadOrders(this.currentPage);
         },
-        error: (error: any) => {
+        error: (error) => {
           console.error('Error cancelling order:', error);
           this.error = 'Failed to cancel order.';
+          this.messageDialogService.error('Failed to cancel order.', 'Error');
         }
       });
     }
@@ -688,6 +610,41 @@ export class AdminOrdersComponent implements OnInit {
     this.selectedStatus = '';
     this.dateFrom = '';
     this.dateTo = '';
+    this.loadOrders(1);
+  }
+
+  handleAction(actionName: string, item: OrderDto): void {
+    switch (actionName) {
+      case 'view':
+        this.viewOrder(item.id || 0);
+        break;
+      case 'ship':
+        if (item.orderStatus === 'Processing') {
+          this.markAsShipped(item.id || 0);
+        }
+        break;
+      case 'deliver':
+        if (item.orderStatus === 'Shipped') {
+          this.markAsDelivered(item.id || 0);
+        }
+        break;
+      case 'cancel':
+        if (item.orderStatus !== 'Cancelled' && item.orderStatus !== 'Delivered') {
+          this.cancelOrder(item.id || 0);
+        }
+        break;
+    }
+  }
+
+  onPageChange(pageConfig: { currentPage: number; pageSize: number }): void {
+    this.currentPage = pageConfig.currentPage;
+    this.pageSize = pageConfig.pageSize;
+    this.loadOrders(this.currentPage);
+  }
+
+  onFilterChange(filterConfig: { searchTerm: string; filters: Record<string, string> }): void {
+    this.searchTerm = filterConfig.searchTerm;
+    this.selectedStatus = filterConfig.filters?.['status'] || '';
     this.loadOrders(1);
   }
 }
